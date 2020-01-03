@@ -2,15 +2,14 @@ package com.yilanjiaju.sulan.module.search.service;
 
 import com.alibaba.fastjson.JSON;
 import com.yilanjiaju.sulan.common.AppContext;
-import com.yilanjiaju.sulan.module.search.mapper.LoggerSearchMapper;
-import com.yilanjiaju.sulan.module.search.pojo.InstanceInfo;
+import com.yilanjiaju.sulan.module.apps.mapper.InstanceInfoMapper;
+import com.yilanjiaju.sulan.module.apps.pojo.InstanceInfo;
 import com.yilanjiaju.sulan.module.search.pojo.LogSearchParam;
 import com.yilanjiaju.sulan.module.search.pojo.Shell;
 import org.apache.commons.text.StringSubstitutor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.stream.Collectors;
@@ -19,7 +18,7 @@ import java.util.stream.Collectors;
 public class LoggerSearchService {
 
     @Autowired
-    private LoggerSearchMapper loggerSearchMapper;
+    private InstanceInfoMapper instanceInfoMapper;
 
     /**
      * 日志搜索
@@ -30,7 +29,7 @@ public class LoggerSearchService {
     public List<HashMap<String, Object>> searchLog(LogSearchParam param){
         List<HashMap<String, Object>> instanceLogList = new ArrayList<>();
         //获取某个应用所有实例；
-        List<InstanceInfo> instanceList = loggerSearchMapper.queryInstanceListByAppId(param.getAppId());
+        List<InstanceInfo> instanceList = instanceInfoMapper.queryInstanceListByAppId(param.getAppId());
 
         String commandTemplate = "fgrep ${extendCommand} -r ${keyword} ${path} -m ${lines}";
         String finalCommand = StringSubstitutor.replace(commandTemplate,  JSON.parseObject(JSON.toJSONString(param), Map.class));

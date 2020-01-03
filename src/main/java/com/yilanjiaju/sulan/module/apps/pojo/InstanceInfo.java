@@ -1,4 +1,4 @@
-package com.yilanjiaju.sulan.module.search.pojo;
+package com.yilanjiaju.sulan.module.apps.pojo;
 
 import lombok.Data;
 

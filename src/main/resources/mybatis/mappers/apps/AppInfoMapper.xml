@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yilanjiaju.sulan.module.apps.mapper.AppInfoMapper">
+
+    <insert id="addOneNewApplication" parameterType="AppInfo">
+        insert into t_app_info
+            (id, app_id, app_name, log_path)
+        values
+            (#{id}, #{appId}, #{appName}, #{logPath})
+    </insert>
+
+    <update id="editApplication" parameterType="AppInfo">
+        update t_app_info
+        <set>
+            <if test="appName!=null and appName!=''">app_name=#{appName},</if>
+            <if test="logPath!=null and logPath!=''">log_path=#{logPath},</if>
+        </set>
+        where id=#{id}
+    </update>
+
+    <update id="deleteApplication" parameterType="">
+        update t_app_info set status=0 where id=#{id}
+    </update>
+</mapper>

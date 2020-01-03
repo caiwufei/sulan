@@ -11,12 +11,13 @@ import java.util.HashMap;
 import java.util.List;
 
 @RestController
+@RequestMapping("/api")
 public class LoggerSearchController {
 
     @Autowired
     private LoggerSearchService loggerSearchService;
 
-    @RequestMapping("/api/search.do")
+    @RequestMapping("/search.do")
     public Object searchLog(@RequestBody LogSearchParam param){
         List<HashMap<String, Object>> result = loggerSearchService.searchLog(param);
         return ResponseUtil.success(result);

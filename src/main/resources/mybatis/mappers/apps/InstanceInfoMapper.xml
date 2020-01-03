@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yilanjiaju.sulan.module.apps.mapper.InstanceInfoMapper">
+
+   <select id="queryInstanceListByAppId" parameterType="String" resultType="InstanceInfo">
+        SELECT
+            id id,
+            app_id appId,
+            app_instance_name appInstanceName,
+            shell_user shellUser,
+            shell_pass shellPass,
+            shell_host shellHost,
+            shell_port shellPort
+        from
+            t_app_instance i
+        where
+            i.app_id=#{appId} and status=1
+   </select>
+
+    <insert id="addOneNewInstance" parameterType="InstanceInfo">
+        insert into t_app_instance
+            (id, app_id, app_instance_name, shell_user, shell_pass, shell_host, shell_port)
+        values
+            (#{id}, #{appId}, #{appInstanceName}, #{shellUser}, #{shellPass}, #{shellHost}, #{shellPort})
+    </insert>
+
+    <update id="editAppInstance" parameterType="InstanceInfo">
+        update t_app_instance
+        <set>
+            <if test="appInstanceName!=null and appInstanceName!=''">app_instance_name=#{appInstanceName},</if>
+            <if test="shell_user!=null and shell_user!=''">shell_user=#{shellUser},</if>
+            <if test="shell_pass!=null and shell_pass!=''">shell_pass=#{shellPass},</if>
+            <if test="shell_host!=null and shell_host!=''">shell_host=#{shellHost},</if>
+            <if test="shellPort!=null and shellPort!=''">shell_port=#{shellPort},</if>
+        </set>
+        where id=#{id}
+    </update>
+
+    <update id="deleteAppInstance" parameterType="InstanceInfo">
+        update t_app_instance set status=0 where id=#{id}
+    </update>
+
+</mapper>
