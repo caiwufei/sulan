@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yilanjiaju.sulan.module.search.mapper.LogSearchMapper">
+
+   <select id="queryInstanceListByAppId" parameterType="String" resultType="InstanceInfo">
+        SELECT
+            id id,
+            app_id appId,
+            app_instance_name appInstanceName,
+            shell_user shellUser,
+            shell_pass shellPass,
+            shell_host shellHost,
+            shell_port shellPort
+        from
+            t_app_instance i
+        where
+            i.app_id=#{appId} and status=1
+   </select>
+
+</mapper>
