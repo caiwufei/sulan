@@ -126,7 +126,7 @@
                 var index = layer.msg('查询中...', {icon: 16,shade: 0.5});
                 $.ajax({
                     type: "POST",
-                    url: contextPath + "search.do",
+                    url: contextPath + "/api/search.do",
                     data: form2JsonString('search-form'),
                     dataType: "json",
                     contentType: "application/json;charset=utf-8",

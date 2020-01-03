@@ -12,7 +12,7 @@ public class FilterConfig {
     public FilterRegistrationBean<LogFilter> registLogFilter() {
         FilterRegistrationBean logFilter = new FilterRegistrationBean();
         logFilter.setFilter(new LogFilter());
-        logFilter.addUrlPatterns("/*");
+        logFilter.addUrlPatterns("/api/*");
         logFilter.setName("LogFilter");
         logFilter.setOrder(1);
         return logFilter;

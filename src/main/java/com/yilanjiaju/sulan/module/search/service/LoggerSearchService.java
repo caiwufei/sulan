@@ -21,12 +21,16 @@ public class LoggerSearchService {
     @Autowired
     private LoggerSearchMapper loggerSearchMapper;
 
+    /**
+     * 日志搜索
+     * grep -C 5 -r e648a80d99 /appletree/log/qtrade_bond/qtrade_bond_debug.2020-01-01.*.log -m 100
+     * @param param
+     * @return
+     */
     public List<HashMap<String, Object>> searchLog(LogSearchParam param){
         List<HashMap<String, Object>> instanceLogList = new ArrayList<>();
         //获取某个应用所有实例；
         List<InstanceInfo> instanceList = loggerSearchMapper.queryInstanceListByAppId(param.getAppId());
-
-        //String command = "grep -C 5 -r e648a80d99 /appletree/log/qtrade_bond/qtrade_bond_debug.2020-01-01.*.log -m 100";
 
         String commandTemplate = "fgrep ${extendCommand} -r ${keyword} ${path} -m ${lines}";
         String finalCommand = StringSubstitutor.replace(commandTemplate,  JSON.parseObject(JSON.toJSONString(param), Map.class));

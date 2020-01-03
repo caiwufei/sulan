@@ -22,12 +22,6 @@ public class LogFilter implements Filter {
         String uri = ((HttpServletRequest) servletRequest).getRequestURI();
         String contentType = ((HttpServletRequest) servletRequest).getContentType();
 
-        //如果是同步接口，就不处理相关，否则日志太庞大
-        if(uri.indexOf("/api/sync/")>-1){
-            filterChain.doFilter(servletRequest, servletResponse);
-            return;
-        }
-
         long start = System.currentTimeMillis();
         //设置日志id
         String requestLogId = UUID.randomUUID().toString().replace("-", "").substring(0,10);

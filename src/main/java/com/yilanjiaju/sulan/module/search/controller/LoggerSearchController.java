@@ -16,7 +16,7 @@ public class LoggerSearchController {
     @Autowired
     private LoggerSearchService loggerSearchService;
 
-    @RequestMapping("/search.do")
+    @RequestMapping("/api/search.do")
     public Object searchLog(@RequestBody LogSearchParam param){
         List<HashMap<String, Object>> result = loggerSearchService.searchLog(param);
         return ResponseUtil.success(result);
