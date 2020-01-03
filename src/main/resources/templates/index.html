@@ -63,7 +63,7 @@
                 <div class="layui-form-item">
                     <label class="layui-form-label">脚本命令</label>
                     <div class="layui-input-block">
-                        <input id="extendCommand" type="text" name="extendCommand" autocomplete="off" placeholder="请输入标题" class="layui-input">
+                        <input id="extendCommand" type="text" name="extendCommand" autocomplete="off" placeholder="请输入脚本命令" class="layui-input">
                     </div>
                 </div>
                 <button style="width: 108px;" type="button" class="layui-btn layui-btn-radius" id="search">搜索</button>
@@ -123,10 +123,10 @@
             var element = layui.element;
 
             $("#search").on("click", function(){
-                var index = layer.load();
+                var index = layer.msg('查询中...', {icon: 16,shade: 0.5});
                 $.ajax({
                     type: "POST",
-                    url: contextPath + "/search.do",
+                    url: contextPath + "search.do",
                     data: form2JsonString('search-form'),
                     dataType: "json",
                     contentType: "application/json;charset=utf-8",
