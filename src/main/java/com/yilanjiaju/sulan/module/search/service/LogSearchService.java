@@ -1,14 +1,11 @@
 package com.yilanjiaju.sulan.module.search.service;
 
-import cn.hutool.core.text.StrSpliter;
 import com.alibaba.fastjson.JSON;
-import com.sun.org.apache.regexp.internal.RE;
 import com.yilanjiaju.sulan.common.AppContext;
 import com.yilanjiaju.sulan.module.search.mapper.LogSearchMapper;
 import com.yilanjiaju.sulan.module.search.pojo.InstanceInfo;
 import com.yilanjiaju.sulan.module.search.pojo.LogSearchParam;
 import com.yilanjiaju.sulan.module.search.pojo.Shell;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.StrSubstitutor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -33,7 +30,7 @@ public class LogSearchService {
 
         //String command = "grep -C 5 -r e648a80d99 /appletree/log/qtrade_bond/qtrade_bond_debug.2020-01-01.*.log -m 100";
 
-        String commandTemplate = "grep ${extendCommand} -r ${keyword} ${path} -m ${lines}";
+        String commandTemplate = "fgrep ${extendCommand} -r ${keyword} ${path} -m ${lines}";
         String finalCommand = StrSubstitutor.replace(commandTemplate,  JSON.parseObject(JSON.toJSONString(param), Map.class));
 
         CountDownLatch latch = new CountDownLatch(instanceList.size());

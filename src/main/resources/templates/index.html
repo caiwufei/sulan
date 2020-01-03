@@ -9,7 +9,7 @@
     <link rel="stylesheet" th:href="@{/static/lib/layui/css/layui.css}" media="all"/>
     <style>
         .highLight{
-
+            background-color: yellow;
         }
 
     </style>
@@ -71,7 +71,7 @@
         </blockquote>
     </div>
 
-    <div style="padding: 20px;" id="logdiv">
+    <div style="padding: 0px 20px 20px 20px;" id="logdiv">
         <!--<fieldset class="layui-elem-field layui-field-title">
             <legend>日志搜索结果</legend>
         </fieldset>
@@ -119,8 +119,8 @@
         //一般直接写在一个js文件中
         layui.use(['layer', 'form', 'jquery', 'element'], function(){
             var layer = layui.layer;
-            var form = layui.form;
             var $ = layui.jquery;
+            var element = layui.element;
 
             $("#search").on("click", function(){
                 var index = layer.load();
@@ -141,8 +141,8 @@
 
             function renderLogView(response) {
                 var logHtml = template('logBoxTemplate', response);
-                //$('#logdiv').append(logHtml);
-                document.getElementById('logdiv').innerHTML = logHtml;
+                $('#logdiv').html(logHtml);
+                element.render('#logdiv');
             }
 
             function form2JsonString(formId) {
@@ -169,7 +169,7 @@
                 <h2 class="layui-colla-title">{{instance.instanceName}}</h2>
                 <div class="layui-colla-content layui-show">
                     {{each instance.logList as log j}}
-                    <p>{{log}}</p>
+                    <p>{{@log}}</p>
                     {{/each}}
                 </div>
             </div>
