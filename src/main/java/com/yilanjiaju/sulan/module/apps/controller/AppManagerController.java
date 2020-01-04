@@ -22,8 +22,9 @@ public class AppManagerController {
     @Autowired
     private AppManagerService appManagerService;
 
+    @RequestMapping("/query_app_list.do")
     public void queryAppList(QueryPage<AppInfo> param){
-
+        appManagerService.queryAppList(param);
     }
 
     @RequestMapping("/add_app.do")

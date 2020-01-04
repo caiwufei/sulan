@@ -1,180 +1,202 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html>
 <head>
     <meta charset="utf-8">
-    <title>搜索页</title>
-    <meta name="renderer" content="webkit">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <title>layui在线调试</title>
     <link rel="stylesheet" th:href="@{/static/lib/layui/css/layui.css}" media="all"/>
     <style>
-        .highLight{
-            background-color: yellow;
-        }
-
+        body{margin: 10px;}
+        .demo-carousel{height: 200px; line-height: 200px; text-align: center;}
     </style>
 </head>
-
 <body>
-
-    <div style="padding: 20px;">
-        <blockquote class="layui-elem-quote">
-            <form class="layui-form layui-form-pane" id="search-form">
-
-                <div class="layui-form-item">
-                    <div class="layui-inline">
-                        <label class="layui-form-label">业务系统</label>
-                        <div class="layui-input-block">
-                            <select name="appId" lay-filter="appId">
-                                <option value="8e3bf145813448cb9bed0c7b4422a4e4" selected="">qtrade-bond</option>
-                                <option value="2">qtrade-erp</option>
-                                <option value="3">qtrade-activity</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="layui-inline">
-                        <label class="layui-form-label">日志行数</label>
-                        <div class="layui-input-block">
-                            <select name="lines" lay-filter="aihao">
-                                <option value="100" selected="">100</option>
-                                <option value="200">200</option>
-                                <option value="500">500</option>
-                                <option value="1000">1000</option>
-                                <option value="2000">2000</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="layui-form-item">
-                    <label class="layui-form-label">关键字</label>
-                    <div class="layui-input-block">
-                        <input id="keyword" type="text" name="keyword" autocomplete="off" placeholder="请输入关键字" class="layui-input">
-                    </div>
-                </div>
-
-                <div class="layui-form-item">
-                    <label class="layui-form-label">日志路径</label>
-                    <div class="layui-input-block">
-                        <input id="path" type="text" name="path" autocomplete="off" placeholder="请输入标题" class="layui-input">
-                    </div>
-                </div>
-
-                <div class="layui-form-item">
-                    <label class="layui-form-label">脚本命令</label>
-                    <div class="layui-input-block">
-                        <input id="extendCommand" type="text" name="extendCommand" autocomplete="off" placeholder="请输入脚本命令" class="layui-input">
-                    </div>
-                </div>
-                <button style="width: 108px;" type="button" class="layui-btn layui-btn-radius" id="search">搜索</button>
-            </form>
-        </blockquote>
-    </div>
-
-    <div style="padding: 0px 20px 20px 20px;" id="logdiv">
-        <!--<fieldset class="layui-elem-field layui-field-title">
-            <legend>日志搜索结果</legend>
-        </fieldset>
-        <div class="layui-collapse" lay-filter="test">
-            <div class="layui-colla-item">
-                <h2 class="layui-colla-title">为什么JS社区大量采用未发布或者未广泛支持的语言特性？</h2>
-                <div class="layui-colla-content layui-show">
-                    <p>有不少其他答案说是因为JS太差。我下面的答案已经说了，这不是根本性的原因。但除此之外，我还要纠正一些对JS具体问题的误解。JS当初是被作为脚本语言设计的，所以某些问题并不是JS设计得差或者是JS设计者的失误。比如var的作用域问题，并不是“错误”，而是当时绝大部分脚本语言都是这样的，如perl/php/sh等。模块的问题也是，脚本语言几乎都没有模块/命名空间功能。弱类型、for-in之类的问题也是，只不过现在用那些老的脚本语言的人比较少，所以很多人都误以为是JS才有的坑。另外有人说JS是半残语言，满足不了开发需求，1999年就该死。半残这个嘛，就夸张了。JS虽然有很多问题，但是设计总体还是优秀的。——来自知乎@贺师俊</p>
-                </div>
-            </div>
-            <div class="layui-colla-item">
-                <h2 class="layui-colla-title">为什么前端工程师多不愿意用 Bootstrap 框架？</h2>
-                <div class="layui-colla-content layui-show">
-                    <p>因为不适合。如果希望开发长期的项目或者制作产品类网站，那么就需要实现特定的设计，为了在维护项目中可以方便地按设计师要求快速修改样式，肯定会逐步编写出各种业务组件、工具类，相当于为项目自行开发一套框架。——来自知乎@Kayo</p>
-                </div>
-            </div>
-            <div class="layui-colla-item">
-                <h2 class="layui-colla-title">layui 更适合哪些开发者？</h2>
-                <div class="layui-colla-content layui-show">
-                    <p>在前端技术快速变革的今天，layui 仍然坚持语义化的组织模式，甚至于模块理念都是采用类AMD组织形式，并非是有意与时代背道而驰。layui 认为以jQuery为核心的开发方式还没有到完全消亡的时候，而早期市面上基于jQuery的UI都普通做得差强人意，所以需要有一个新的UI去重新为这一领域注入活力，并采用一些更科学的架构方式。
-                        <br><br>
-                        因此准确地说，layui 更多是面向那些追求开发简单的前端工程师们，以及所有层次的服务端程序员。</p>
-                </div>
-            </div>
-            <div class="layui-colla-item">
-                <h2 class="layui-colla-title">贤心是男是女？</h2>
-                <div class="layui-colla-content layui-show">
-                    <p>man！ 所以这个问题不要再出现了。。。</p>
-                </div>
-            </div>
-        </div>-->
-    </div>
+<table class="layui-hide" id="app_list" lay-filter="test"></table>
 
 
-
-
-    <script th:src="@{/static/lib/layui/layui.js}"></script>
-    <script th:src="@{/static/lib/template-web.js}"></script>
-    <script type="text/javascript" th:inline="javascript">
-        /*<![CDATA[*/
-        contextPath = /*[[@{/}]]*/ '';
-        /*]]>*/
-    </script>
-    <script>
-        //一般直接写在一个js文件中
-        layui.use(['layer', 'form', 'jquery', 'element'], function(){
-            var layer = layui.layer;
-            var $ = layui.jquery;
-            var element = layui.element;
-
-            $("#search").on("click", function(){
-                var index = layer.msg('查询中...', {icon: 16,shade: 0.5});
-                $.ajax({
-                    type: "POST",
-                    url: contextPath + "/api/search.do",
-                    data: form2JsonString('search-form'),
-                    dataType: "json",
-                    contentType: "application/json;charset=utf-8",
-                    success: function(response){
-                        renderLogView(response);
+<script th:src="@{/static/lib/layui/layui.js}"></script>
+<script>
+    /*<![CDATA[*/
+    contextPath = /*[[@{/}]]*/ '';
+    /*]]>*/
+</script>
+<script type="text/html" id="barDemo">
+    <a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="detail">查看</a>
+</script>
+<script type="text/html" id="barDemo1">
+    <a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="detail">查看</a>
+</script>
+<script>
+    layui.use(['laydate', 'laypage', 'layer', 'table', 'carousel', 'upload', 'element', 'slider'],
+        function() {
+            var table = layui.table //表格
+            //执行一个 table 实例
+            table.render({
+                elem: '#app_list',
+                height: 670,
+                url: '/demo/table/user/' //数据接口
+                ,
+                title: '用户表',
+                page: true //开启分页
+                ,
+                cols:
+                    [
+                    [ //表头
+                    {
+                        type: 'checkbox',
+                        fixed: 'left'
                     },
-                    complete: function(request, status){
-                        layer.close(index);
+                    {
+                        field: 'username',
+                        title: '用户名',
+                        minWidth: 100,
+                        event: 'collapse',
+                        templet: function(d) {
+                            return '<div style="position: relative;\n' + '    padding: 0 10px 0 20px;">' + d.username + '<i style="left: 0px;" lay-tips="展开" class="layui-icon layui-colla-icon layui-icon-right"></i></div>'
+                        }
+                    },
+                    {
+                        field: 'experience',
+                        title: '积分',
+                        width: 90,
+                        sort: true
+                    },
+                    {
+                        field: 'sex',
+                        title: '性别',
+                        width: 80,
+                        sort: true
+                    },
+                    {
+                        field: 'score',
+                        title: '评分',
+                        width: 80,
+                        sort: true
+                    },
+                    {
+                        field: 'city',
+                        title: '城市',
+                        width: 150
+                    },
+                    {
+                        fixed: 'right',
+                        width: 80,
+                        align: 'center',
+                        toolbar: '#barDemo'
                     }
-                });
+                    ]
+                ]
             });
 
-            function renderLogView(response) {
-                var logHtml = template('logBoxTemplate', response);
-                $('#logdiv').html(logHtml);
-                element.render('#logdiv');
-            }
+            //监听工具条
+            table.on('tool(test)',
+                function(obj) {
 
-            function form2JsonString(formId) {
-                var paramArray = $('#' + formId).serializeArray();
-                var jsonObj={};
-                $(paramArray).each(function(){
-                    jsonObj[this.name]=this.value;
+                    var data = obj.data;
+                    if (obj.event === 'collapse') {
+                        var trObj = layui.$(this).parent('tr'); //当前行
+                        var accordion = true //开启手风琴，那么在进行折叠操作时，始终只会展现当前展开的表格。
+                        var content = '<table></table>' //内容
+                        //表格行折叠方法
+                        collapseTable({
+                            elem: trObj,
+                            accordion: accordion,
+                            content: content,
+                            success: function(trObjChildren, index) { //成功回调函数
+                                //trObjChildren 展开tr层DOM
+                                //index 当前层索引
+                                trObjChildren.find('table').attr("id", index);
+                                table.render({
+                                    elem: "#" + index,
+                                    url: '/demo/table/user',
+                                    limit: 3,
+                                    cellMinWidth: 80,
+                                    cols: [
+                                        [
+                                            {
+                                        type: 'checkbox',
+                                        fixed: 'left'
+                                    },
+                                        {
+                                            field: 'id',
+                                            width: 80,
+                                            title: 'ID',
+                                            sort: true
+                                        },
+                                        {
+                                            field: 'username',
+                                            title: '用户名'
+                                        },
+                                        {
+                                            field: 'sex',
+                                            title: '性别',
+                                            sort: true
+                                        },
+                                        {
+                                            field: 'city',
+                                            title: '城市'
+                                        },
+                                        {
+                                            fixed: 'right',
+                                            width: 80,
+                                            align: 'center',
+                                            toolbar: '#barDemo1'
+                                        }
+                                        ]
+                                    ]
+                                });
+
+                            }
+                        });
+
+                    }
                 });
-                // json对象再转换成json字符串
-                return JSON.stringify(jsonObj);
+
+            function collapseTable(options) {
+                var trObj = options.elem;
+                if (!trObj) return;
+                var accordion = options.accordion,
+                    success = options.success,
+                    content = options.content || '';
+                var tableView = trObj.parents('.layui-table-view'); //当前表格视图
+                var id = tableView.attr('lay-id'); //当前表格标识
+                var index = trObj.data('index'); //当前行索引
+                var leftTr = tableView.find('.layui-table-fixed.layui-table-fixed-l tr[data-index="' + index + '"]'); //左侧当前固定行
+                var rightTr = tableView.find('.layui-table-fixed.layui-table-fixed-r tr[data-index="' + index + '"]'); //右侧当前固定行
+                var colspan = trObj.find('td').length; //获取合并长度
+                var trObjChildren = trObj.next(); //展开行Dom
+                var indexChildren = id + '-' + index + '-children'; //展开行索引
+                var leftTrChildren = tableView.find('.layui-table-fixed.layui-table-fixed-l tr[data-index="' + indexChildren + '"]'); //左侧展开固定行
+                var rightTrChildren = tableView.find('.layui-table-fixed.layui-table-fixed-r tr[data-index="' + indexChildren + '"]'); //右侧展开固定行
+                var lw = leftTr.width() + 15; //左宽
+                var rw = rightTr.width() + 15; //右宽
+                //不存在就创建展开行
+                if (trObjChildren.data('index') != indexChildren) {
+                    //装载HTML元素
+                    var tr = '<tr data-index="' + indexChildren + '"><td colspan="' + colspan + '"><div style="height: auto;padding-left:' + lw + 'px;padding-right:' + rw + 'px" class="layui-table-cell">' + content + '</div></td></tr>';
+                    trObjChildren = trObj.after(tr).next().hide(); //隐藏展开行
+                    var fixTr = '<tr data-index="' + indexChildren + '"></tr>';//固定行
+                    leftTrChildren = leftTr.after(fixTr).next().hide(); //左固定
+                    rightTrChildren = rightTr.after(fixTr).next().hide(); //右固定
+                }
+                //展开|折叠箭头图标
+                trObj.find('td[lay-event="collapse"] i.layui-colla-icon').toggleClass("layui-icon-right layui-icon-down");
+                //显示|隐藏展开行
+                trObjChildren.toggle();
+                //开启手风琴折叠和折叠箭头
+                if (accordion) {
+                    trObj.siblings().find('td[lay-event="collapse"] i.layui-colla-icon').removeClass("layui-icon-down").addClass("layui-icon-right");
+                    trObjChildren.siblings('[data-index$="-children"]').hide(); //展开
+                    rightTrChildren.siblings('[data-index$="-children"]').hide(); //左固定
+                    leftTrChildren.siblings('[data-index$="-children"]').hide(); //右固定
+                }
+                success(trObjChildren, indexChildren); //回调函数
+                heightChildren = trObjChildren.height(); //展开高度固定
+                rightTrChildren.height(heightChildren + 115).toggle(); //左固定
+                leftTrChildren.height(heightChildren + 115).toggle(); //右固定
             }
 
         });
-
-    </script>
-
-    <script id="logBoxTemplate" type="text/html">
-        <fieldset class="layui-elem-field layui-field-title">
-            <legend>日志搜索结果</legend>
-        </fieldset>
-        <div class="layui-collapse" lay-filter="test">
-            {{each data as instance i}}
-            <div class="layui-colla-item">
-                <h2 class="layui-colla-title">{{instance.instanceName}}</h2>
-                <div class="layui-colla-content layui-show">
-                    {{each instance.logList as log j}}
-                    <p>{{@log}}</p>
-                    {{/each}}
-                </div>
-            </div>
-            {{/each}}
-        </div>
-    </script>
+</script>
 </body>
 </html>
