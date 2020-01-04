@@ -4,10 +4,13 @@ import com.yilanjiaju.sulan.common.utils.ResponseUtil;
 import com.yilanjiaju.sulan.module.apps.pojo.AppInfo;
 import com.yilanjiaju.sulan.module.apps.pojo.InstanceInfo;
 import com.yilanjiaju.sulan.module.apps.service.AppManagerService;
+import com.yilanjiaju.sulan.module.system.pojo.QueryPage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import javax.management.Query;
 
 /**
  * @author caiwufei
@@ -18,6 +21,10 @@ public class AppManagerController {
 
     @Autowired
     private AppManagerService appManagerService;
+
+    public void queryAppList(QueryPage<AppInfo> param){
+
+    }
 
     @RequestMapping("/add_app.do")
     public Object addOneNewApplication(@RequestBody AppInfo appInfo){

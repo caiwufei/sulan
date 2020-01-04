@@ -18,7 +18,11 @@
         where id=#{id}
     </update>
 
-    <update id="deleteApplication" parameterType="">
+    <update id="deleteApplication" parameterType="AppInfo">
         update t_app_info set status=0 where id=#{id}
     </update>
+
+    <select id="queryAppList" parameterType="QueryPage" resultType="AppInfo">
+
+    </select>
 </mapper>

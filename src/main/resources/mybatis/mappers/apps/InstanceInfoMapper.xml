@@ -28,9 +28,9 @@
         update t_app_instance
         <set>
             <if test="appInstanceName!=null and appInstanceName!=''">app_instance_name=#{appInstanceName},</if>
-            <if test="shell_user!=null and shell_user!=''">shell_user=#{shellUser},</if>
-            <if test="shell_pass!=null and shell_pass!=''">shell_pass=#{shellPass},</if>
-            <if test="shell_host!=null and shell_host!=''">shell_host=#{shellHost},</if>
+            <if test="shellUser!=null and shellUser!=''">shell_user=#{shellUser},</if>
+            <if test="shellPass!=null and shellPass!=''">shell_pass=#{shellPass},</if>
+            <if test="shellHost!=null and shellHost!=''">shell_host=#{shellHost},</if>
             <if test="shellPort!=null and shellPort!=''">shell_port=#{shellPort},</if>
         </set>
         where id=#{id}

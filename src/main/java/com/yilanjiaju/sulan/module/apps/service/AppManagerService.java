@@ -5,6 +5,7 @@ import com.yilanjiaju.sulan.module.apps.mapper.AppInfoMapper;
 import com.yilanjiaju.sulan.module.apps.mapper.InstanceInfoMapper;
 import com.yilanjiaju.sulan.module.apps.pojo.AppInfo;
 import com.yilanjiaju.sulan.module.apps.pojo.InstanceInfo;
+import com.yilanjiaju.sulan.module.system.pojo.QueryPage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,6 +18,10 @@ public class AppManagerService {
     private AppInfoMapper appInfoMapper;
     @Autowired
     private InstanceInfoMapper instanceInfoMapper;
+
+    public void queryAppList(QueryPage<AppInfo> param){
+        appInfoMapper.queryAppList(param);
+    }
 
     public int addOneNewApplication(AppInfo appInfo){
         appInfo.setId(CommonUtil.uuid());

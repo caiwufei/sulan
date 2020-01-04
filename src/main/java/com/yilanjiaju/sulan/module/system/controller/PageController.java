@@ -11,9 +11,24 @@ public class PageController {
         return "index";
     }
 
+    @RequestMapping("/search.html")
+    public String search(){
+        return "search";
+    }
 
     @RequestMapping("/apps.html")
     public String apps(){
         return "apps";
+    }
+
+
+    @RequestMapping("/tab1.html")
+    public String tab1(){
+        return "tab1";
+    }
+
+    @RequestMapping("/tab2.html")
+    public String tab2(){
+        return "tab2";
     }
 }
