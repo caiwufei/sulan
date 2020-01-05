@@ -12,18 +12,19 @@
 </head>
 <body>
 
-    <table class="layui-hide" id="app_list" lay-filter="test"></table>
+    <table class="layui-hide" id="app_list" lay-filter="app_list"></table>
 
 
 <script th:src="@{/static/lib/layui/layui.js}"></script>
-<script>
-    /*<![CDATA[*/
-    contextPath = /*[[@{/}]]*/ '';
-    /*]]>*/
-</script>
-<script type="text/html" id="barDemo">
+<script th:src="@{/static/js/app.js}"></script>
+<script type="text/html" id="bar_level_1">
      <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
-     <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+     <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="delete">删除</a>
+</script>
+
+<script type="text/html" id="bar_level_2">
+     <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+     <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="delete">删除</a>
 </script>
 <script>
     layui.use(['laydate', 'laypage', 'layer', 'table', 'carousel', 'upload', 'element', 'slider'],
@@ -60,15 +61,48 @@
                         field: 'logPath',
                         title: '默认日志路径'
                      },
-                        {fixed: 'right', title:'操作', toolbar: '#barDemo'}
+                        {fixed: 'right', title:'操作', toolbar: '#bar_level_1'}
                     ]
                     ]
             });
 
-            //监听工具条
-            table.on('tool(test)',
+            //监听一级表格
+            table.on('tool(app_list)',
                 function(obj) {
                     var data = obj.data;
+                    if (obj.event === 'edit') {
+
+                    }
+
+                    if (obj.event === 'delete') {
+                        //询问框
+                        var confirmIndex = layer.confirm('请确认是否要删除应用【{0}】？（提示：删除应用的同时，相关实例信息也会一并删除）'.format(data.appName), {
+                            title: "删除确认",
+                            area:['450px', '200px'],
+                            btn: ['删除','取消'],
+                        }, function(){
+                            var del_index = layer.msg('删除中...', {icon: 16,shade: 0.5});
+                            var param = {};
+                            param.appId = data.appId;
+                            $.ajax({
+                                type: "POST",
+                                url: contextPath + "api/apps/delete_app.do",
+                                dataType: "json",
+                                data: param,
+                                contentType: "application/json;charset=utf-8",
+                                success: function(response){
+                                    layer.close(del_index);
+                                    if(response.code===0){
+                                        layer.open({
+                                            content: '删除成功！',
+                                            time:1000
+                                        });
+                                    }
+                                }
+                            });
+                        });
+                    }
+
                     if (obj.event === 'collapse') {
                         var trObj = layui.$(this).parent('tr'); //当前行
                         var accordion = true //开启手风琴，那么在进行折叠操作时，始终只会展现当前展开的表格。
@@ -81,7 +115,8 @@
                             success: function(trObjChildren, index) { //成功回调函数
                                 //trObjChildren 展开tr层DOM
                                 //index 当前层索引
-                                trObjChildren.find('table').attr("id", index);
+                                trObjChildren.find('table').attr("id", index).attr("lay-filter", "instance_list");
+/*                                trObjChildren.find('table').attr("lay-filter", "app_list");*/
                                 table.render({
                                     elem: "#" + index,
                                     url: contextPath + 'api/apps/get_instance_list.do',
@@ -126,17 +161,18 @@
                                                  width: '10%'
                                             },
                                             {
-                                                fixed: 'right',
+                                                title: '操作',
                                                 width: '20%',
-                                                align: 'center',
-                                                toolbar: '#barDemo'
+                                                templet: function(d) {
+                                                    return '<a class="layui-btn layui-btn-xs">编辑</a>'
+                                                         + '<a class="layui-btn layui-btn-danger layui-btn-xs"">删除</a>';
+                                                }
                                             }]
                                     ]
                                 });
 
                             }
                         });
-
                     }
                 });
 
@@ -183,7 +219,6 @@
                 rightTrChildren.height(heightChildren + 115).toggle(); //左固定
                 leftTrChildren.height(heightChildren + 115).toggle(); //右固定
             }
-
         });
 </script>
 </body>
