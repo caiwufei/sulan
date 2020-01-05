@@ -10,6 +10,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @Slf4j
 public class AppManagerService {
@@ -47,5 +49,13 @@ public class AppManagerService {
 
     public int deleteAppInstance(InstanceInfo instanceInfo){
         return instanceInfoMapper.deleteAppInstance(instanceInfo);
+    }
+
+    public List<AppInfo> queryAllAppList(){
+        return appInfoMapper.queryAllAppList();
+    }
+
+    public List<InstanceInfo> queryInstanceList(String appId){
+        return instanceInfoMapper.queryInstanceListByAppId(appId);
     }
 }

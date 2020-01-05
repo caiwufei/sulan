@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
@@ -11,7 +11,8 @@
     </style>
 </head>
 <body>
-<table class="layui-hide" id="app_list" lay-filter="test"></table>
+
+    <table class="layui-hide" id="app_list" lay-filter="test"></table>
 
 
 <script th:src="@{/static/lib/layui/layui.js}"></script>
@@ -21,10 +22,8 @@
     /*]]>*/
 </script>
 <script type="text/html" id="barDemo">
-    <a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="detail">查看</a>
-</script>
-<script type="text/html" id="barDemo1">
-    <a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="detail">查看</a>
+     <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+     <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
 </script>
 <script>
     layui.use(['laydate', 'laypage', 'layer', 'table', 'carousel', 'upload', 'element', 'slider'],
@@ -35,62 +34,40 @@
 
             table.render({
                 elem: '#app_list',
-                height: 670,
-                url: contextPath + '/api//query_app_list.do',
+                url: contextPath + 'api/apps/query_app_list.do',
                 title: '应用列表',
-                page: true,
+                page: false,
+                parseData: function(res){ //res 即为原始返回的数据
+                    return {
+                        "code": res.code, //解析接口状态
+                        "msg": res.msg, //解析提示文本
+                        "data": res.data.apps //解析数据列表
+                    };
+                },
                 cols:
                     [
-                    [{
-                        type: 'checkbox',
-                        fixed: 'left'
-                    },
-                    {
-                        field: 'username',
-                        title: '用户名',
-                        minWidth: 100,
+                    [
+                     {
+                        field: 'appName',
+                        title: '应用名',
                         event: 'collapse',
+                        sort: true,
                         templet: function(d) {
-                            return '<div style="position: relative;\n' + '    padding: 0 10px 0 20px;">' + d.username + '<i style="left: 0px;" lay-tips="展开" class="layui-icon layui-colla-icon layui-icon-right"></i></div>'
+                            return '<div style="position: relative;padding: 0 10px 0 20px;">' + d.appName + '<i style="left: 0px;" lay-tips="展开" class="layui-icon layui-colla-icon layui-icon-right"></i></div>'
                         }
-                    },
-                    {
-                        field: 'experience',
-                        title: '积分',
-                        width: 90,
-                        sort: true
-                    },
-                    {
-                        field: 'sex',
-                        title: '性别',
-                        width: 80,
-                        sort: true
-                    },
-                    {
-                        field: 'score',
-                        title: '评分',
-                        width: 80,
-                        sort: true
-                    },
-                    {
-                        field: 'city',
-                        title: '城市',
-                        width: 150
-                    },
-                    {
-                        fixed: 'right',
-                        width: 80,
-                        align: 'center',
-                        toolbar: '#barDemo'
-                    }
+                     },
+                     {
+                        field: 'logPath',
+                        title: '默认日志路径'
+                     },
+                        {fixed: 'right', title:'操作', toolbar: '#barDemo'}
                     ]
-                ]
+                    ]
             });
 
             //监听工具条
             table.on('tool(test)',
                 function(obj) {
-
                     var data = obj.data;
                     if (obj.event === 'collapse') {
                         var trObj = layui.$(this).parent('tr'); //当前行
@@ -107,41 +84,53 @@
                                 trObjChildren.find('table').attr("id", index);
                                 table.render({
                                     elem: "#" + index,
-                                    url: '/demo/table/user',
-                                    limit: 3,
-                                    cellMinWidth: 80,
-                                    cols: [
-                                        [
-                                            {
-                                        type: 'checkbox',
-                                        fixed: 'left'
+                                    url: contextPath + 'api/apps/get_instance_list.do',
+                                    page: false,
+                                    method: 'POST',
+                                    contentType: 'application/json',
+                                    where: {
+                                        appId: data.appId
                                     },
-                                        {
-                                            field: 'id',
-                                            width: 80,
-                                            title: 'ID',
-                                            sort: true
-                                        },
-                                        {
-                                            field: 'username',
-                                            title: '用户名'
-                                        },
-                                        {
-                                            field: 'sex',
-                                            title: '性别',
-                                            sort: true
-                                        },
-                                        {
-                                            field: 'city',
-                                            title: '城市'
-                                        },
-                                        {
-                                            fixed: 'right',
-                                            width: 80,
-                                            align: 'center',
-                                            toolbar: '#barDemo1'
-                                        }
-                                        ]
+                                    parseData: function(res){ //res 即为原始返回的数据
+                                        return {
+                                            "code": res.code, //解析接口状态
+                                            "msg": res.msg, //解析提示文本
+                                            "data": res.data.instances //解析数据列表
+                                        };
+                                    },
+                                    cols: [
+                                            [{
+                                                field: 'appInstanceName',
+                                                title: '实例名',
+                                                sort: true,
+                                                width: '30%'
+                                            },
+                                            {
+                                                field: 'shellHost',
+                                                title: '主机IP',
+                                                width: '15%'
+                                            },
+                                            {
+                                                field: 'shellPort',
+                                                title: '主机端口',
+                                                width: '10%'
+                                            },
+                                            {
+                                                 field: 'shellUser',
+                                                 title: '登陆用户',
+                                                 width: '15%'
+                                            },
+                                            {
+                                                 field: 'shellPass',
+                                                 title: '登陆密码',
+                                                 width: '10%'
+                                            },
+                                            {
+                                                fixed: 'right',
+                                                width: '20%',
+                                                align: 'center',
+                                                toolbar: '#barDemo'
+                                            }]
                                     ]
                                 });
 

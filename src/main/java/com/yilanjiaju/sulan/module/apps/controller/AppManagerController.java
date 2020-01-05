@@ -11,20 +11,28 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.management.Query;
+import java.util.List;
 
 /**
  * @author caiwufei
  */
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/apps")
 public class AppManagerController {
 
     @Autowired
     private AppManagerService appManagerService;
 
     @RequestMapping("/query_app_list.do")
-    public void queryAppList(QueryPage<AppInfo> param){
-        appManagerService.queryAppList(param);
+    public Object queryAppList(){
+        List<AppInfo> list = appManagerService.queryAllAppList();
+        return ResponseUtil.success("apps", list);
+    }
+
+    @RequestMapping("/get_instance_list.do")
+    public Object queryInstanceList(@RequestBody AppInfo appInfo){
+        List<InstanceInfo> list = appManagerService.queryInstanceList(appInfo.getAppId());
+        return ResponseUtil.success("instances", list);
     }
 
     @RequestMapping("/add_app.do")

@@ -2,8 +2,6 @@ package com.yilanjiaju.sulan.module.apps.pojo;
 
 import lombok.Data;
 
-import java.util.List;
-
 @Data
 public class AppInfo {
 
@@ -14,6 +12,4 @@ public class AppInfo {
     private String appName;
 
     private String logPath;
-
-    private List<InstanceInfo> instanceInfoList;
 }
