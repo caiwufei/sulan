@@ -2,7 +2,9 @@ package com.yilanjiaju.sulan.module.search.service;
 
 import com.alibaba.fastjson.JSON;
 import com.yilanjiaju.sulan.common.AppContext;
+import com.yilanjiaju.sulan.module.apps.mapper.AppInfoMapper;
 import com.yilanjiaju.sulan.module.apps.mapper.InstanceInfoMapper;
+import com.yilanjiaju.sulan.module.apps.pojo.AppInfo;
 import com.yilanjiaju.sulan.module.apps.pojo.InstanceInfo;
 import com.yilanjiaju.sulan.module.search.pojo.LogSearchParam;
 import com.yilanjiaju.sulan.module.search.pojo.Shell;
@@ -19,6 +21,9 @@ public class LoggerSearchService {
 
     @Autowired
     private InstanceInfoMapper instanceInfoMapper;
+
+    @Autowired
+    private AppInfoMapper appInfoMapper;
 
     /**
      * 日志搜索
@@ -64,5 +69,13 @@ public class LoggerSearchService {
             e.printStackTrace();
         }
         return instanceLogList;
+    }
+
+    public List<AppInfo> getApps(){
+        List<AppInfo> list = appInfoMapper.queryAllAppList();
+        if(null==list) {
+            list = new ArrayList<>();
+        }
+        return list;
     }
 }

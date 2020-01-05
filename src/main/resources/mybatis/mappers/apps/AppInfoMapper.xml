@@ -25,4 +25,10 @@
     <select id="queryAppList" parameterType="QueryPage" resultType="AppInfo">
 
     </select>
+
+    <select id="queryAllAppList" resultType="AppInfo">
+        SELECT id id, app_id appId, app_name appName, log_path logPath
+        FROM t_app_info
+        ORDER BY app_name asc
+    </select>
 </mapper>

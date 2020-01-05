@@ -16,4 +16,6 @@ public interface AppInfoMapper {
     public int deleteApplication(AppInfo appInfo);
 
     public List<AppInfo> queryAppList(QueryPage page);
+
+    public List<AppInfo> queryAllAppList();
 }
