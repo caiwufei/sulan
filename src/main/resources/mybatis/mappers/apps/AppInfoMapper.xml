@@ -19,7 +19,7 @@
     </update>
 
     <update id="deleteApplication" parameterType="AppInfo">
-        update t_app_info set status=0 where id=#{id}
+        update t_app_info set status=0 where app_id=#{appId}
     </update>
 
     <select id="queryAppList" parameterType="QueryPage" resultType="AppInfo">
@@ -29,6 +29,7 @@
     <select id="queryAllAppList" resultType="AppInfo">
         SELECT id id, app_id appId, app_name appName, log_path logPath
         FROM t_app_info
+        where status=1
         ORDER BY app_name asc
     </select>
 </mapper>

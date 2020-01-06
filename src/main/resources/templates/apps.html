@@ -18,14 +18,11 @@
 <script th:src="@{/static/lib/layui/layui.js}"></script>
 <script th:src="@{/static/js/app.js}"></script>
 <script type="text/html" id="bar_level_1">
-     <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
-     <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="delete">删除</a>
+     <a class="layui-btn layui-btn-xs" lay-event="edit">编辑应用</a>
+     <a class="layui-btn layui-btn-xs" lay-event="add">添加实例</a>
+     <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="delete">删除应用</a>
 </script>
 
-<script type="text/html" id="bar_level_2">
-     <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
-     <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="delete">删除</a>
-</script>
 <script>
     layui.use(['laydate', 'laypage', 'layer', 'table', 'carousel', 'upload', 'element', 'slider'],
         function() {
@@ -80,23 +77,19 @@
                             title: "删除确认",
                             area:['450px', '200px'],
                             btn: ['删除','取消'],
-                        }, function(){
-                            var del_index = layer.msg('删除中...', {icon: 16,shade: 0.5});
-                            var param = {};
-                            param.appId = data.appId;
+                        }, function() {
+                            var del_index = layer.msg('删除中...', {icon: 5,shade: 0.5});
                             $.ajax({
                                 type: "POST",
                                 url: contextPath + "api/apps/delete_app.do",
                                 dataType: "json",
-                                data: param,
+                                data: JSON.stringify({'appId':data.appId}),
                                 contentType: "application/json;charset=utf-8",
                                 success: function(response){
                                     layer.close(del_index);
                                     if(response.code===0){
-                                        layer.open({
-                                            content: '删除成功！',
-                                            time:1000
-                                        });
+                                        layer.msg('删除成功', {icon: 5,time:1000,shade: 0.5});
+                                        $(obj.tr).remove();
                                     }
                                 }
                             });
