@@ -108,7 +108,7 @@
                     layer.close(del_index);
                     if(response.code===0){
                         layer.msg('删除成功', {icon: 5,time:1000,shade: 0.5});
-                        $(obj.tr).remove();
+                        $(data).parent().parent().parent().remove();
                     }
                 }
             });

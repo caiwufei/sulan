@@ -10,6 +10,7 @@ import com.yilanjiaju.sulan.module.system.pojo.QueryPage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 
@@ -58,7 +59,11 @@ public class AppManagerService {
     }
 
     public List<InstanceInfo> queryInstanceList(String appId){
-        return instanceInfoMapper.queryInstanceListByAppId(appId);
+        List<InstanceInfo> list = instanceInfoMapper.queryInstanceListByAppId(appId);
+        if (!CollectionUtils.isEmpty(list)) {
+            list.forEach(i->i.setShellPass("******"));
+        }
+        return list;
     }
 
     public AppInfo queryAppByAppId(String appId) {

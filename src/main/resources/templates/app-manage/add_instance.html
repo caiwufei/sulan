@@ -103,7 +103,9 @@
                     contentType: "application/json;charset=utf-8",
                     success: function(response){
                         index = layer.msg('创建成功', {time :1000});
-                        window.parent.location.reload();
+                        setTimeout(function () {
+                            window.parent.location.reload();
+                        }, 500);
                     }
                 });
             });
