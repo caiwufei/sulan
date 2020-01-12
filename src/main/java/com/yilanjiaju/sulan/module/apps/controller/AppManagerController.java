@@ -53,19 +53,19 @@ public class AppManagerController {
         return ResponseUtil.success();
     }
 
-    @RequestMapping("/add_app_instance.do")
+    @RequestMapping("/add_instance.do")
     public Object addOneNewInstance(@RequestBody InstanceInfo instanceInfo){
         int count = appManagerService.addOneNewInstance(instanceInfo);
         return ResponseUtil.success();
     }
 
-    @RequestMapping("/edit_app_instance.do")
+    @RequestMapping("/edit_instance.do")
     public Object editAppInstance(@RequestBody InstanceInfo instanceInfo){
         int count = appManagerService.editAppInstance(instanceInfo);
         return ResponseUtil.success();
     }
 
-    @RequestMapping("/delete_app_instance.do")
+    @RequestMapping("/delete_instance.do")
     public Object deleteAppInstance(@RequestBody InstanceInfo instanceInfo){
         int count = appManagerService.deleteAppInstance(instanceInfo);
         return ResponseUtil.success();

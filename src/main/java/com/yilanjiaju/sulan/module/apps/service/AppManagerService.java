@@ -1,5 +1,6 @@
 package com.yilanjiaju.sulan.module.apps.service;
 
+import com.sun.xml.internal.bind.v2.schemagen.xmlschema.Appinfo;
 import com.yilanjiaju.sulan.common.utils.CommonUtil;
 import com.yilanjiaju.sulan.module.apps.mapper.AppInfoMapper;
 import com.yilanjiaju.sulan.module.apps.mapper.InstanceInfoMapper;
@@ -27,6 +28,7 @@ public class AppManagerService {
 
     public int addOneNewApplication(AppInfo appInfo){
         appInfo.setId(CommonUtil.uuid());
+        appInfo.setAppId(appInfo.getId());
         return appInfoMapper.addOneNewApplication(appInfo);
     }
 
@@ -57,5 +59,13 @@ public class AppManagerService {
 
     public List<InstanceInfo> queryInstanceList(String appId){
         return instanceInfoMapper.queryInstanceListByAppId(appId);
+    }
+
+    public AppInfo queryAppByAppId(String appId) {
+        return appInfoMapper.queryAppByAppId(appId);
+    }
+
+    public InstanceInfo queryInstanceById(String id) {
+        return instanceInfoMapper.queryInstanceById(id);
     }
 }

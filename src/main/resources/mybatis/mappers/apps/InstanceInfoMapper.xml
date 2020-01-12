@@ -40,4 +40,19 @@
         update t_app_instance set status=0 where id=#{id}
     </update>
 
+    <select id="queryInstanceById" resultType="InstanceInfo">
+        SELECT
+            id id,
+            app_id appId,
+            app_instance_name appInstanceName,
+            shell_user shellUser,
+            shell_pass shellPass,
+            shell_host shellHost,
+            shell_port shellPort
+        from
+            t_app_instance i
+        where
+            i.id=#{id} and status=1
+    </select>
+
 </mapper>

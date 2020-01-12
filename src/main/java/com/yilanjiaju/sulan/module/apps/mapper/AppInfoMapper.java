@@ -18,4 +18,7 @@ public interface AppInfoMapper {
     public List<AppInfo> queryAppList(QueryPage page);
 
     public List<AppInfo> queryAllAppList();
+
+    public AppInfo queryAppByAppId(String appId);
 }
+

@@ -3,7 +3,8 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <title>layui在线调试</title>
+    <title>应用管理</title>
+    <link rel="icon" th:href="@{/static/images/favicon.ico}" type="image/x-icon">
     <link rel="stylesheet" th:href="@{/static/lib/layui/css/layui.css}" media="all"/>
     <style>
         body{margin: 10px;}
@@ -11,41 +12,57 @@
     </style>
 </head>
 <body>
-
+    <button class="layui-btn" id="add_app_bt">添加应用</button>
     <table class="layui-hide" id="app_list" lay-filter="app_list"></table>
 
 
-<script th:src="@{/static/lib/layui/layui.js}"></script>
+<script th:src="@{/static/lib/layui/layui.all.js}"></script>
 <script th:src="@{/static/js/app.js}"></script>
 <script type="text/html" id="bar_level_1">
-     <a class="layui-btn layui-btn-xs" lay-event="edit">编辑应用</a>
-     <a class="layui-btn layui-btn-xs" lay-event="add">添加实例</a>
-     <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="delete">删除应用</a>
+     <a class="layui-btn layui-btn-xs" lay-event="edit_app">编辑应用</a>
+     <a class="layui-btn layui-btn-xs" lay-event="add_instance">添加实例</a>
+     <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="delete_app">删除应用</a>
 </script>
+    <script type="text/html" id="bar_level_2">
+        <a class="layui-btn layui-btn-xs" onclick='editInstance(this, "{{d.id}}")'>编辑</a>
+        <a class="layui-btn layui-btn-danger layui-btn-xs" onclick='deleteInstance(this, "{{d.id}}", "{{d.appInstanceName}}")'>删除</a>
+    </script>
 
 <script>
-    layui.use(['laydate', 'laypage', 'layer', 'table', 'carousel', 'upload', 'element', 'slider'],
-        function() {
-            var table = layui.table; //表格
-            var layer = layui.layer;
-            var $ = layui.jquery;
 
-            table.render({
-                elem: '#app_list',
-                url: contextPath + 'api/apps/query_app_list.do',
-                title: '应用列表',
-                page: false,
-                parseData: function(res){ //res 即为原始返回的数据
-                    return {
-                        "code": res.code, //解析接口状态
-                        "msg": res.msg, //解析提示文本
-                        "data": res.data.apps //解析数据列表
-                    };
-                },
-                cols:
-                    [
-                    [
-                     {
+    var layer = layui.layer;
+    var $ = layui.jquery;
+    var element = layui.element;
+    var form = layui.form;
+    var table = layui.table;
+
+    $('#add_app_bt').bind('click', function () {
+        layer.open({
+            title: "添加应用",
+            closeBtn: 1,
+            shadeClose: true,
+            type: 2,
+            area: ['650px', '300px'],
+            content: contextPath + 'app-manage/add_app.html'
+        });
+    })
+
+    table.render({
+        elem: '#app_list',
+        url: contextPath + 'api/apps/query_app_list.do',
+        title: '应用列表',
+        page: false,
+        parseData: function(res){ //res 即为原始返回的数据
+            return {
+                "code": res.code, //解析接口状态
+                "msg": res.msg, //解析提示文本
+                "data": res.data.apps //解析数据列表
+            };
+        },
+        cols:
+            [
+                [
+                    {
                         field: 'appName',
                         title: '应用名',
                         event: 'collapse',
@@ -53,166 +70,215 @@
                         templet: function(d) {
                             return '<div style="position: relative;padding: 0 10px 0 20px;">' + d.appName + '<i style="left: 0px;" lay-tips="展开" class="layui-icon layui-colla-icon layui-icon-right"></i></div>'
                         }
-                     },
-                     {
+                    },
+                    {
                         field: 'logPath',
                         title: '默认日志路径'
-                     },
-                        {fixed: 'right', title:'操作', toolbar: '#bar_level_1'}
-                    ]
-                    ]
+                    },
+                    {fixed: 'right', title:'操作', toolbar: '#bar_level_1'}
+                ]
+            ]
+    });
+
+    function editInstance(data, instanceId){
+        layer.open({
+            title: "编辑应用实例",
+            closeBtn: 1,
+            shadeClose: true,
+            type: 2,
+            area: ['650px', '450px'],
+            content: contextPath + 'app-manage/edit_instance.html?id=' + instanceId
+        });
+    }
+
+    function deleteInstance(data, instanceId, appInstanceName){
+        var confirmIndex = layer.confirm('请确认是否要删除应用实例【{0}】？（提示：删除应用实例将不可恢复）'.format(appInstanceName), {
+            title: "删除确认",
+            area:['450px', '200px'],
+            btn: ['删除','取消'],
+        }, function() {
+            var del_index = layer.msg('删除中...', {icon: 5,shade: 0.5});
+            $.ajax({
+                type: "POST",
+                url: contextPath + "api/apps/delete_instance.do",
+                dataType: "json",
+                data: JSON.stringify({'id': instanceId}),
+                contentType: "application/json;charset=utf-8",
+                success: function(response){
+                    layer.close(del_index);
+                    if(response.code===0){
+                        layer.msg('删除成功', {icon: 5,time:1000,shade: 0.5});
+                        $(obj.tr).remove();
+                    }
+                }
             });
+        });
+    }
 
-            //监听一级表格
-            table.on('tool(app_list)',
-                function(obj) {
-                    var data = obj.data;
-                    if (obj.event === 'edit') {
+    //监听一级表格
+    table.on('tool(app_list)',
+        function(obj) {
+            var data = obj.data;
+            if (obj.event === 'edit_app') {
+                layer.open({
+                    title: "编辑应用",
+                    closeBtn: 1,
+                    shadeClose: true,
+                    type: 2,
+                    area: ['650px', '300px'],
+                    content: contextPath + 'app-manage/edit_app.html?appId=' + data.appId
+                });
+            }
 
-                    }
+            if(obj.event === 'add_instance') {
+                layer.open({
+                    title: "添加应用实例",
+                    closeBtn: 1,
+                    shadeClose: true,
+                    type: 2,
+                    area: ['650px', '450px'],
+                    content: contextPath + 'app-manage/add_instance.html?appId=' + data.appId
+                });
+            }
 
-                    if (obj.event === 'delete') {
-                        //询问框
-                        var confirmIndex = layer.confirm('请确认是否要删除应用【{0}】？（提示：删除应用的同时，相关实例信息也会一并删除）'.format(data.appName), {
-                            title: "删除确认",
-                            area:['450px', '200px'],
-                            btn: ['删除','取消'],
-                        }, function() {
-                            var del_index = layer.msg('删除中...', {icon: 5,shade: 0.5});
-                            $.ajax({
-                                type: "POST",
-                                url: contextPath + "api/apps/delete_app.do",
-                                dataType: "json",
-                                data: JSON.stringify({'appId':data.appId}),
-                                contentType: "application/json;charset=utf-8",
-                                success: function(response){
-                                    layer.close(del_index);
-                                    if(response.code===0){
-                                        layer.msg('删除成功', {icon: 5,time:1000,shade: 0.5});
-                                        $(obj.tr).remove();
-                                    }
-                                }
-                            });
-                        });
-                    }
-
-                    if (obj.event === 'collapse') {
-                        var trObj = layui.$(this).parent('tr'); //当前行
-                        var accordion = true //开启手风琴，那么在进行折叠操作时，始终只会展现当前展开的表格。
-                        var content = '<table></table>' //内容
-                        //表格行折叠方法
-                        collapseTable({
-                            elem: trObj,
-                            accordion: accordion,
-                            content: content,
-                            success: function(trObjChildren, index) { //成功回调函数
-                                //trObjChildren 展开tr层DOM
-                                //index 当前层索引
-                                trObjChildren.find('table').attr("id", index).attr("lay-filter", "instance_list");
-/*                                trObjChildren.find('table').attr("lay-filter", "app_list");*/
-                                table.render({
-                                    elem: "#" + index,
-                                    url: contextPath + 'api/apps/get_instance_list.do',
-                                    page: false,
-                                    method: 'POST',
-                                    contentType: 'application/json',
-                                    where: {
-                                        appId: data.appId
-                                    },
-                                    parseData: function(res){ //res 即为原始返回的数据
-                                        return {
-                                            "code": res.code, //解析接口状态
-                                            "msg": res.msg, //解析提示文本
-                                            "data": res.data.instances //解析数据列表
-                                        };
-                                    },
-                                    cols: [
-                                            [{
-                                                field: 'appInstanceName',
-                                                title: '实例名',
-                                                sort: true,
-                                                width: '30%'
-                                            },
-                                            {
-                                                field: 'shellHost',
-                                                title: '主机IP',
-                                                width: '15%'
-                                            },
-                                            {
-                                                field: 'shellPort',
-                                                title: '主机端口',
-                                                width: '10%'
-                                            },
-                                            {
-                                                 field: 'shellUser',
-                                                 title: '登陆用户',
-                                                 width: '15%'
-                                            },
-                                            {
-                                                 field: 'shellPass',
-                                                 title: '登陆密码',
-                                                 width: '10%'
-                                            },
-                                            {
-                                                title: '操作',
-                                                width: '20%',
-                                                templet: function(d) {
-                                                    return '<a class="layui-btn layui-btn-xs">编辑</a>'
-                                                         + '<a class="layui-btn layui-btn-danger layui-btn-xs"">删除</a>';
-                                                }
-                                            }]
-                                    ]
-                                });
-
+            if (obj.event === 'delete_app') {
+                //询问框
+                var confirmIndex = layer.confirm('请确认是否要删除应用【{0}】？（提示：删除应用的同时，相关实例信息也会一并删除）'.format(data.appName), {
+                    title: "删除确认",
+                    area:['450px', '200px'],
+                    btn: ['删除','取消'],
+                }, function() {
+                    var del_index = layer.msg('删除中...', {icon: 5,shade: 0.5});
+                    $.ajax({
+                        type: "POST",
+                        url: contextPath + "api/apps/delete_app.do",
+                        dataType: "json",
+                        data: JSON.stringify({'appId':data.appId}),
+                        contentType: "application/json;charset=utf-8",
+                        success: function(response){
+                            layer.close(del_index);
+                            if(response.code===0){
+                                layer.msg('删除成功', {icon: 5,time:1000,shade: 0.5});
+                                $(obj.tr).remove();
                             }
+                        }
+                    });
+                });
+            }
+
+            if (obj.event === 'collapse') {
+                var trObj = layui.$(this).parent('tr'); //当前行
+                var accordion = true //开启手风琴，那么在进行折叠操作时，始终只会展现当前展开的表格。
+                var content = '<table></table>' //内容
+                //表格行折叠方法
+                collapseTable({
+                    elem: trObj,
+                    accordion: accordion,
+                    content: content,
+                    success: function(trObjChildren, index) { //成功回调函数
+                        //trObjChildren 展开tr层DOM
+                        //index 当前层索引
+                        trObjChildren.find('table').attr("id", index).attr("lay-filter", "instance_list");
+                        /*                                trObjChildren.find('table').attr("lay-filter", "app_list");*/
+                        table.render({
+                            elem: "#" + index,
+                            url: contextPath + 'api/apps/get_instance_list.do',
+                            page: false,
+                            method: 'POST',
+                            contentType: 'application/json',
+                            where: {
+                                appId: data.appId
+                            },
+                            parseData: function(res){ //res 即为原始返回的数据
+                                return {
+                                    "code": res.code, //解析接口状态
+                                    "msg": res.msg, //解析提示文本
+                                    "data": res.data.instances //解析数据列表
+                                };
+                            },
+                            cols: [
+                                [{
+                                    field: 'appInstanceName',
+                                    title: '实例名',
+                                    sort: true,
+                                    width: '30%'
+                                },
+                                    {
+                                        field: 'shellHost',
+                                        title: '主机IP',
+                                        width: '15%'
+                                    },
+                                    {
+                                        field: 'shellPort',
+                                        title: '主机端口',
+                                        width: '10%'
+                                    },
+                                    {
+                                        field: 'shellUser',
+                                        title: '登陆用户',
+                                        width: '15%'
+                                    },
+                                    {
+                                        field: 'shellPass',
+                                        title: '登陆密码',
+                                        width: '10%'
+                                    },
+                                    {
+                                        title: '操作',
+                                        width: '20%',
+                                        templet: "#bar_level_2"
+                                    }]
+                            ]
                         });
+
                     }
                 });
-
-            function collapseTable(options) {
-                var trObj = options.elem;
-                if (!trObj) return;
-                var accordion = options.accordion,
-                    success = options.success,
-                    content = options.content || '';
-                var tableView = trObj.parents('.layui-table-view'); //当前表格视图
-                var id = tableView.attr('lay-id'); //当前表格标识
-                var index = trObj.data('index'); //当前行索引
-                var leftTr = tableView.find('.layui-table-fixed.layui-table-fixed-l tr[data-index="' + index + '"]'); //左侧当前固定行
-                var rightTr = tableView.find('.layui-table-fixed.layui-table-fixed-r tr[data-index="' + index + '"]'); //右侧当前固定行
-                var colspan = trObj.find('td').length; //获取合并长度
-                var trObjChildren = trObj.next(); //展开行Dom
-                var indexChildren = id + '-' + index + '-children'; //展开行索引
-                var leftTrChildren = tableView.find('.layui-table-fixed.layui-table-fixed-l tr[data-index="' + indexChildren + '"]'); //左侧展开固定行
-                var rightTrChildren = tableView.find('.layui-table-fixed.layui-table-fixed-r tr[data-index="' + indexChildren + '"]'); //右侧展开固定行
-                var lw = leftTr.width() + 15; //左宽
-                var rw = rightTr.width() + 15; //右宽
-                //不存在就创建展开行
-                if (trObjChildren.data('index') != indexChildren) {
-                    //装载HTML元素
-                    var tr = '<tr data-index="' + indexChildren + '"><td colspan="' + colspan + '"><div style="height: auto;padding-left:' + lw + 'px;padding-right:' + rw + 'px" class="layui-table-cell">' + content + '</div></td></tr>';
-                    trObjChildren = trObj.after(tr).next().hide(); //隐藏展开行
-                    var fixTr = '<tr data-index="' + indexChildren + '"></tr>';//固定行
-                    leftTrChildren = leftTr.after(fixTr).next().hide(); //左固定
-                    rightTrChildren = rightTr.after(fixTr).next().hide(); //右固定
-                }
-                //展开|折叠箭头图标
-                trObj.find('td[lay-event="collapse"] i.layui-colla-icon').toggleClass("layui-icon-right layui-icon-down");
-                //显示|隐藏展开行
-                trObjChildren.toggle();
-                //开启手风琴折叠和折叠箭头
-                if (accordion) {
-                    trObj.siblings().find('td[lay-event="collapse"] i.layui-colla-icon').removeClass("layui-icon-down").addClass("layui-icon-right");
-                    trObjChildren.siblings('[data-index$="-children"]').hide(); //展开
-                    rightTrChildren.siblings('[data-index$="-children"]').hide(); //左固定
-                    leftTrChildren.siblings('[data-index$="-children"]').hide(); //右固定
-                }
-                success(trObjChildren, indexChildren); //回调函数
-                heightChildren = trObjChildren.height(); //展开高度固定
-                rightTrChildren.height(heightChildren + 115).toggle(); //左固定
-                leftTrChildren.height(heightChildren + 115).toggle(); //右固定
             }
         });
+
+    function collapseTable(options) {
+        var trObj = options.elem;
+        if (!trObj) return;
+        var accordion = options.accordion,
+            success = options.success,
+            content = options.content || '';
+        var tableView = trObj.parents('.layui-table-view'); //当前表格视图
+        var id = tableView.attr('lay-id'); //当前表格标识
+        var index = trObj.data('index'); //当前行索引
+        var leftTr = tableView.find('.layui-table-fixed.layui-table-fixed-l tr[data-index="' + index + '"]'); //左侧当前固定行
+        var rightTr = tableView.find('.layui-table-fixed.layui-table-fixed-r tr[data-index="' + index + '"]'); //右侧当前固定行
+        var colspan = trObj.find('td').length; //获取合并长度
+        var trObjChildren = trObj.next(); //展开行Dom
+        var indexChildren = id + '-' + index + '-children'; //展开行索引
+        var leftTrChildren = tableView.find('.layui-table-fixed.layui-table-fixed-l tr[data-index="' + indexChildren + '"]'); //左侧展开固定行
+        var rightTrChildren = tableView.find('.layui-table-fixed.layui-table-fixed-r tr[data-index="' + indexChildren + '"]'); //右侧展开固定行
+        var lw = leftTr.width() + 15; //左宽
+        var rw = rightTr.width() + 15; //右宽
+        //不存在就创建展开行
+        if (trObjChildren.data('index') != indexChildren) {
+            //装载HTML元素
+            var tr = '<tr data-index="' + indexChildren + '"><td colspan="' + colspan + '"><div style="height: auto;padding-left:' + lw + 'px;padding-right:' + rw + 'px" class="layui-table-cell">' + content + '</div></td></tr>';
+            trObjChildren = trObj.after(tr).next().hide(); //隐藏展开行
+            var fixTr = '<tr data-index="' + indexChildren + '"></tr>';//固定行
+            leftTrChildren = leftTr.after(fixTr).next().hide(); //左固定
+            rightTrChildren = rightTr.after(fixTr).next().hide(); //右固定
+        }
+        //展开|折叠箭头图标
+        trObj.find('td[lay-event="collapse"] i.layui-colla-icon').toggleClass("layui-icon-right layui-icon-down");
+        //显示|隐藏展开行
+        trObjChildren.toggle();
+        //开启手风琴折叠和折叠箭头
+        if (accordion) {
+            trObj.siblings().find('td[lay-event="collapse"] i.layui-colla-icon').removeClass("layui-icon-down").addClass("layui-icon-right");
+            trObjChildren.siblings('[data-index$="-children"]').hide(); //展开
+            rightTrChildren.siblings('[data-index$="-children"]').hide(); //左固定
+            leftTrChildren.siblings('[data-index$="-children"]').hide(); //右固定
+        }
+        success(trObjChildren, indexChildren); //回调函数
+        heightChildren = trObjChildren.height(); //展开高度固定
+        rightTrChildren.height(heightChildren + 115).toggle(); //左固定
+        leftTrChildren.height(heightChildren + 115).toggle(); //右固定
+    }
 </script>
 </body>
 </html>

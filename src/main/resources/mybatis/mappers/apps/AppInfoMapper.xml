@@ -15,7 +15,7 @@
             <if test="appName!=null and appName!=''">app_name=#{appName},</if>
             <if test="logPath!=null and logPath!=''">log_path=#{logPath},</if>
         </set>
-        where id=#{id}
+        where app_id=#{appId}
     </update>
 
     <update id="deleteApplication" parameterType="AppInfo">
@@ -31,5 +31,11 @@
         FROM t_app_info
         where status=1
         ORDER BY app_name asc
+    </select>
+
+    <select id="queryAppByAppId" resultType="AppInfo">
+        SELECT id id, app_id appId, app_name appName, log_path logPath
+        FROM t_app_info
+        where status=1 and app_id=#{appId}
     </select>
 </mapper>

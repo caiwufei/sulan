@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <title>编辑应用实例</title>
+    <link rel="stylesheet" th:href="@{/static/lib/layui/css/layui.css}" media="all"/>
+    <style>
+
+    </style>
+</head>
+<body style="padding: 30px 45px 30px 15px">
+
+
+<form class="layui-form" id="edit_instance_form">
+    <div class="layui-form-item" style="display: none">
+        <label class="layui-form-label">实例ID：</label>
+        <div class="layui-input-block">
+            <input type="text" name="id" placeholder="请输入" class="layui-input" lay-verify="required">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">实例名：</label>
+        <div class="layui-input-block">
+            <input type="text" name="appInstanceName" placeholder="请输入" class="layui-input" lay-verify="required">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">实例主机：</label>
+        <div class="layui-input-block">
+            <input type="text" name="shellHost" placeholder="请输入" class="layui-input" lay-verify="required">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">主机端口：</label>
+        <div class="layui-input-block">
+            <input type="text" name="shellPort" placeholder="请输入" class="layui-input" lay-verify="required">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">用户名：</label>
+        <div class="layui-input-block">
+            <input type="text" name="shellUser" placeholder="请输入" class="layui-input" lay-verify="required">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">密码：</label>
+        <div class="layui-input-block">
+            <input type="text" name="shellPass" placeholder="请输入" class="layui-input" lay-verify="required">
+        </div>
+    </div>
+    <button type="button" class="layui-btn" id="submit" style="margin-top: 25px;float: right;width: 90px;">更新</button>
+</form>
+
+<script th:src="@{/static/lib/layui/layui.js}"></script>
+<script type="text/javascript" th:inline="javascript">
+
+    /*<![CDATA[*/
+    contextPath = /*[[@{/}]]*/ '';
+    /*]]>*/
+    instance = [[${instance}]];
+</script>
+<script>
+    layui.use(['laydate', 'laypage', 'layer', 'table', 'carousel', 'upload', 'element', 'slider'],
+        function() {
+            var table = layui.table; //表格
+            var layer = layui.layer;
+            var $ = layui.jquery;
+
+            $(function () {
+                $("input[name='id']").val(instance.id);
+                $("input[name='appInstanceName']").val(instance.appInstanceName);
+                $("input[name='shellHost']").val(instance.shellHost);
+                $("input[name='shellPort']").val(instance.shellPort);
+                $("input[name='shellPass']").val(instance.shellPass);
+                $("input[name='shellUser']").val(instance.shellUser);
+            })
+
+            $("#submit").on("click", function(){
+                var  param = form2Json('edit_instance_form');
+                if(param.appInstanceName===undefined || ""===param.appInstanceName.trim()){
+                    layer.msg('实例名为必填');
+                    return;
+                }
+                if(param.shellHost===undefined || ""===param.shellHost.trim()){
+                    layer.msg('实例主机为必填');
+                    return;
+                }
+                if(param.shellPort===undefined || ""===param.shellPort.trim()){
+                    layer.msg('主机端口为必填');
+                    return;
+                }
+                if(param.shellUser===undefined || ""===param.shellUser.trim()){
+                    layer.msg('用户名为必填');
+                    return;
+                }
+                if(param.shellPass===undefined || ""===param.shellPass.trim()){
+                    layer.msg('密码为必填');
+                    return;
+                }
+                var index = layer.msg('更新中...', {icon: 16,shade: 0.5});
+                $.ajax({
+                    type: "POST",
+                    url: contextPath + "api/apps/edit_instance.do",
+                    data: JSON.stringify(form2Json('edit_instance_form')),
+                    dataType: "json",
+                    contentType: "application/json;charset=utf-8",
+                    success: function(response){
+                        index = layer.msg('更新成功', {time :1000});
+                        window.parent.location.reload();
+                    }
+                });
+            });
+
+
+            function form2Json(formId) {
+                var paramArray = $('#' + formId).serializeArray();
+                var jsonObj={};
+                $(paramArray).each(function(){
+                    jsonObj[this.name]=this.value;
+                });
+                // json对象再转换成json字符串
+                //return JSON.stringify(jsonObj);
+                return jsonObj;
+            }
+        }
+    )
+</script>
+
+</body>
+</html>

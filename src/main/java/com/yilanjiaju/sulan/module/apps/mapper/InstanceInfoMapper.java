@@ -14,4 +14,6 @@ public interface InstanceInfoMapper {
     public int editAppInstance(InstanceInfo instanceInfo);
 
     public int deleteAppInstance(InstanceInfo instanceInfo);
+
+    public InstanceInfo queryInstanceById(String id);
 }
