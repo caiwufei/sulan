@@ -5,6 +5,7 @@ import lombok.Data;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
 @Data
@@ -43,6 +44,7 @@ public class Shell {
         Session session = null;
         ChannelExec channelExec = null;
         BufferedReader input = null;
+        InputStreamReader inputStreamReader = null;
         try {
             //打开通道，设置通道类型，和执行的命令
             session = getSession();
@@ -51,9 +53,9 @@ public class Shell {
             }
             channelExec = (ChannelExec)session.openChannel("exec");
             channelExec.setCommand(command);
-
             channelExec.setInputStream(null);
-            input = new BufferedReader(new InputStreamReader(channelExec.getInputStream()));
+            inputStreamReader = new InputStreamReader(channelExec.getInputStream(), StandardCharsets.UTF_8);
+            input = new BufferedReader(inputStreamReader);
 
             channelExec.connect();
             //接收远程服务器执行命令的结果
@@ -76,6 +78,13 @@ public class Shell {
                 // 得到returnCode
                 if (channelExec.isClosed()) {
                     return channelExec.getExitStatus();
+                }
+            }
+            if(null!=inputStreamReader) {
+                try {
+                    inputStreamReader.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
             }
             if(null!=getSession()){

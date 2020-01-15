@@ -9,6 +9,8 @@ public interface InstanceInfoMapper {
 
     public List<InstanceInfo> queryInstanceListByAppId(String appId);
 
+    public List<InstanceInfo> queryInstanceList();
+
     public int addOneNewInstance(InstanceInfo instanceInfo);
 
     public int editAppInstance(InstanceInfo instanceInfo);

@@ -20,6 +20,8 @@ import java.security.SecureRandom;
 @Slf4j
 public class AESUtil {
 
+    public static final String KEY = "YILANJIAJU";
+
     private static final String KEY_ALGORITHM = "AES";
     private static final String DEFAULT_CIPHER_ALGORITHM = "AES/ECB/PKCS5Padding";//默认的加密算法
 

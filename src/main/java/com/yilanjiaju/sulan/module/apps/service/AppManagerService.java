@@ -1,6 +1,6 @@
 package com.yilanjiaju.sulan.module.apps.service;
 
-import com.sun.xml.internal.bind.v2.schemagen.xmlschema.Appinfo;
+import com.yilanjiaju.sulan.common.utils.AESUtil;
 import com.yilanjiaju.sulan.common.utils.CommonUtil;
 import com.yilanjiaju.sulan.module.apps.mapper.AppInfoMapper;
 import com.yilanjiaju.sulan.module.apps.mapper.InstanceInfoMapper;
@@ -11,7 +11,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 @Service
@@ -43,6 +47,19 @@ public class AppManagerService {
 
     public int addOneNewInstance(InstanceInfo instanceInfo){
         instanceInfo.setId(CommonUtil.uuid());
+        try {
+            instanceInfo.setShellPass(AESUtil.encrypt(instanceInfo.getShellPass(), AESUtil.KEY));
+        } catch (NoSuchPaddingException e) {
+            e.printStackTrace();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (InvalidKeyException e) {
+            e.printStackTrace();
+        } catch (BadPaddingException e) {
+            e.printStackTrace();
+        } catch (IllegalBlockSizeException e) {
+            e.printStackTrace();
+        }
         return instanceInfoMapper.addOneNewInstance(instanceInfo);
     }
 
