@@ -6,5 +6,7 @@
 
 #### 目前项目有两个页面
 - 应用管理页面 `http://106.13.230.2/sulan/index.html`
+![avatar](image/app编辑示意图.png)
 - 日志搜索页面 `http://106.13.230.2/sulan/apps.html`
+![avatar](image/搜索示意图.png)
 - 后续会增加一个结果快照页面
