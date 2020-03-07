@@ -14,4 +14,6 @@ public class LogSearchParam {
     private String appId;
 
     private Integer lines = 500;
+
+    private String mode;
 }

@@ -34,6 +34,18 @@
                         </div>
                     </div>
                     <div class="layui-inline">
+                        <label class="layui-form-label">查询模式</label>
+                        <div class="layui-input-block">
+                            <select name="mode" lay-filter="mode">
+                                <option value="grep" selected="">文件头 ———▶ 匹配</option>
+                                <option value="tac">匹配 ◀——— 文件尾</option>
+                                <option value="head">文件头 ———▶ 打印</option>
+                                <option value="tail">打印 ◀——— 文件尾</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="layui-inline">
                         <label class="layui-form-label">日志行数</label>
                         <div class="layui-input-block">
                             <select name="lines" lay-filter="aihao">
@@ -42,6 +54,8 @@
                                 <option value="500">500</option>
                                 <option value="1000">1000</option>
                                 <option value="2000">2000</option>
+                                <option value="2000">3000</option>
+                                <option value="2000">5000</option>
                             </select>
                         </div>
                     </div>
@@ -50,7 +64,7 @@
                 <div class="layui-form-item">
                     <label class="layui-form-label">关键字</label>
                     <div class="layui-input-block">
-                        <input id="keyword" type="text" name="keyword" placeholder="请输入关键字" class="layui-input">
+                        <input id="keyword" type="text" name="keyword" placeholder="请输入关键词，使用grep命令从文件头开始匹配关键词，输出设定的匹配行数。" class="layui-input">
                     </div>
                 </div>
 
@@ -64,7 +78,7 @@
                 <div class="layui-form-item">
                     <label class="layui-form-label">脚本命令</label>
                     <div class="layui-input-block">
-                        <input id="extendCommand" type="text" name="extendCommand" placeholder="脚本命令，如： -h 输出不带文件名，-C 10 输出匹配行和它前后10行， -A 10 输出匹配行后和它后面的10行， -B 10 输出匹配行和它前面的10行)" class="layui-input">
+                        <input id="extendCommand" type="text" name="extendCommand" placeholder="grep脚本命令，如： -h 输出不带文件名，-C 10 输出匹配行和它前后10行， -A 10 输出匹配行后和它后面的10行， -B 10 输出匹配行和它前面的10行)" class="layui-input">
                     </div>
                 </div>
                 <button style="width: 108px;" type="button" class="layui-btn layui-btn-radius" id="search">搜索</button>
@@ -160,6 +174,42 @@
                         $('#path').val(apps[i].logPath);
                     }
                 }
+            });
+
+
+            form.on('select(mode)', function(data){
+                if(data.value==="head") {
+                    $('#keyword').val("");
+                    $('#extendCommand').val("");
+                    $('#keyword').attr('disabled', 'disabled');
+                    $('#extendCommand').attr('disabled', 'disabled');
+                    $('#keyword').attr('placeholder', '使用head命令从文件头开始打印设定的行数，不进行关键词匹配。');
+                    $('#extendCommand').attr('placeholder', '使用head命令从文件头开始打印设定的行数，无需命令参数。');
+                }
+
+                if(data.value==="tail") {
+                    $('#keyword').val("");
+                    $('#extendCommand').val("");
+                    $('#keyword').attr('disabled', 'disabled');
+                    $('#extendCommand').attr('disabled', 'disabled');
+                    $('#keyword').attr('placeholder', '使用tail命令从文件末尾开始打印设定的行数，不进行关键词匹配。');
+                    $('#extendCommand').attr('placeholder', '使用tail命令从文件末尾开始打印设定的行数，无需命令参数。');
+                }
+
+                if(data.value==="grep") {
+                    $('#keyword').removeAttr('disabled');
+                    $('#extendCommand').removeAttr('disabled');
+                    $('#keyword').attr('placeholder', '请输入关键词，使用grep命令从文件头开始匹配关键词，输出设定的匹配行数。');
+                    $('#extendCommand').attr('placeholder', 'grep命令补充参数，如： -h 输出不带文件名，-C 10 输出匹配行和它前后10行， -A 10 输出匹配行后和它后面的10行， -B 10 输出匹配行和它前面的10行)');
+                }
+
+                if(data.value==="tac") {
+                    $('#keyword').removeAttr('disabled');
+                    $('#extendCommand').removeAttr('disabled');
+                    $('#keyword').attr('placeholder', '请输入关键词，使用tac + grep 组合命令从文件末尾开始匹配关键词，输出设定的匹配行数。');
+                    $('#extendCommand').attr('placeholder', 'grep命令补充参数，如： -h 输出不带文件名，-C 10 输出匹配行和它前后10行， -A 10 输出匹配行后和它后面的10行， -B 10 输出匹配行和它前面的10行)');
+                }
+
             })
 
 
