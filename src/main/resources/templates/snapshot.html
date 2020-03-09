@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>日志搜索</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="icon" th:href="@{/static/images/favicon.ico}" type="image/x-icon">
+    <link rel="stylesheet" th:href="@{/static/lib/layui/css/layui.css}" media="all"/>
+    <style>
+        .highLight{
+            background-color: yellow;
+        }
+
+    </style>
+</head>
+
+<body>
+
+    <div style="padding: 0px 20px 20px 20px;" id="logdiv">
+
+    </div>
+
+
+
+
+    <script th:src="@{/static/lib/layui/layui.js}"></script>
+    <script th:src="@{/static/lib/template-web.js}"></script>
+    <script type="text/javascript" th:inline="javascript">
+        /*<![CDATA[*/
+        contextPath = /*[[@{/}]]*/ '';
+        var logshotId = [[${snapshotId}]];
+        /*]]>*/
+    </script>
+    <script>
+        //全局变量，只有发送查询请求的时候，这个值才有
+
+        String.prototype.format = function () {
+            var values = arguments;
+            return this.replace(/\{(\d+)\}/g, function (match, index) {
+                if (values.length > index) {
+                    return values[index];
+                } else {
+                    return "";
+                }
+            });
+        };
+
+        var apps = [];
+        //一般直接写在一个js文件中
+        layui.use(['layer', 'form', 'jquery', 'element'], function(){
+            var layer = layui.layer;
+            var $ = layui.jquery;
+            var element = layui.element;
+            var form = layui.form;
+
+            $(function(){
+                var index = layer.msg('查询中...', {icon: 16,shade: 0.5});
+                var param = {};
+                param.id = logshotId;
+                $.ajax({
+                    type: "POST",
+                    url: contextPath + "api/search/get_log_snapshot.do",
+                    data: param,
+                    dataType: "json",
+                    contentType: "application/json;charset=utf-8",
+                    success: function(response){
+                        renderLogView(response);
+                    },
+                    complete: function(request, status){
+                        layer.close(search);
+                    }
+                });
+            });
+
+
+
+            function renderLogView(response) {
+                var logHtml = template('logBoxTemplate', response.instanceLogList);
+                $('#logdiv').html(logHtml);
+                element.render('#logdiv');
+            }
+
+            function form2JsonString(formId) {
+                var paramArray = $('#' + formId).serializeArray();
+                var jsonObj={};
+                $(paramArray).each(function(){
+                    jsonObj[this.name]=this.value;
+                });
+                // json对象再转换成json字符串
+                return JSON.stringify(jsonObj);
+            }
+
+        });
+
+    </script>
+
+    <script id="logBoxTemplate" type="text/html">
+        <fieldset class="layui-elem-field layui-field-title">
+            <legend>日志搜索结果</legend>
+        </fieldset>
+        <div class="layui-collapse" lay-filter="test">
+            {{each data as instance i}}
+            <div class="layui-colla-item">
+                <h2 class="layui-colla-title">{{instance.instanceName}}</h2>
+                <div class="layui-colla-content layui-show">
+                    {{each instance.logList as log j}}
+                    <p>{{@log}}</p>
+                    {{/each}}
+                </div>
+            </div>
+            {{/each}}
+        </div>
+    </script>
+</body>
+</html>

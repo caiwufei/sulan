@@ -1,6 +1,7 @@
 package com.yilanjiaju.sulan.module.search.service;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.yilanjiaju.sulan.common.AppContext;
 import com.yilanjiaju.sulan.common.constant.CommandTemplate;
 import com.yilanjiaju.sulan.common.utils.AESUtil;
@@ -8,23 +9,24 @@ import com.yilanjiaju.sulan.module.apps.mapper.AppInfoMapper;
 import com.yilanjiaju.sulan.module.apps.mapper.InstanceInfoMapper;
 import com.yilanjiaju.sulan.module.apps.pojo.AppInfo;
 import com.yilanjiaju.sulan.module.apps.pojo.InstanceInfo;
+import com.yilanjiaju.sulan.module.search.pojo.InstanceLog;
 import com.yilanjiaju.sulan.module.search.pojo.LogSearchParam;
 import com.yilanjiaju.sulan.module.search.pojo.Shell;
+import com.yilanjiaju.sulan.module.search.pojo.SnapshotLog;
+import io.netty.util.internal.StringUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringSubstitutor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import javax.annotation.PostConstruct;
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Service
@@ -36,6 +38,9 @@ public class SearchService {
 
     @Autowired
     private AppInfoMapper appInfoMapper;
+
+    @Autowired
+    private RedisTemplate<String, Object> redisTemplate;
 
     private ConcurrentHashMap<String, String> userPass = new ConcurrentHashMap<>();
 
@@ -67,8 +72,8 @@ public class SearchService {
      * @param param
      * @return
      */
-    public List<HashMap<String, Object>> searchLog(LogSearchParam param){
-        List<HashMap<String, Object>> instanceLogList = new ArrayList<>();
+    public List<InstanceLog> searchLog(LogSearchParam param){
+        List<InstanceLog> instanceLogList = new ArrayList<>();
         //获取某个应用所有实例；
         List<InstanceInfo> instanceList = instanceInfoMapper.queryInstanceListByAppId(param.getAppId());
 
@@ -76,19 +81,20 @@ public class SearchService {
                                                         JSON.parseObject(JSON.toJSONString(param), Map.class));
 
         log.info("--------search command=={}", finalCommand);
+
         CountDownLatch latch = new CountDownLatch(instanceList.size());
         for (InstanceInfo app : instanceList) {
             //加载shell，并登陆
             Shell shell = getShellFromAppInfoConfig(app);
             //使用shell执行搜索脚本操作
             AppContext.getTaskExecutor().execute(()->{
-                HashMap<String, Object> instanceMap = new HashMap();
-                instanceMap.put("instanceName", app.getAppInstanceName());
+                InstanceLog instanceLog = new InstanceLog();
+                instanceLog.setInstanceName(app.getAppInstanceName());
                 shell.exec(finalCommand);
                 List<String> logList = shell.getStdout();
                 if(CollectionUtils.isEmpty(logList)){
                     //没有结果，那么返回no-data
-                    instanceMap.put("logList", Arrays.asList("--- no data ---"));
+                    instanceLog.setLogList(Arrays.asList("--- no data ---"));
                 } else {
                     //如果使用tac+grep，把结果翻转
                     if (param.getMode().equals(CommandTemplate.tac.getName())) {
@@ -99,9 +105,73 @@ public class SearchService {
                         String highLight = "<a class='highLight'>" + param.getKeyword() + "</a>";
                         logList = logList.stream().map(e-> e.replaceAll(param.getKeyword(), highLight)).collect(Collectors.toList());
                     }
-                    instanceMap.put("logList", logList);
+                    instanceLog.setLogList(logList);
                 }
-                instanceLogList.add(instanceMap);
+                instanceLogList.add(instanceLog);
+                latch.countDown();
+            });
+        }
+
+        try {
+            latch.await();
+
+            SnapshotLog snapshotLog = new SnapshotLog();
+            snapshotLog.setId(AppContext.getRequestLogId());
+            snapshotLog.setCommand(finalCommand);
+            snapshotLog.setMode(param.getMode());
+            snapshotLog.setAppId(param.getAppId());
+            if(StringUtils.isNotBlank(param.getKeyword())) {
+                snapshotLog.setKeyword(param.getKeyword());
+            }
+            redisTemplate.opsForValue().set("sulan::log_snapshot_info::"+snapshotLog.getId(), snapshotLog.toString(), 1,  TimeUnit.DAYS);
+        } catch (InterruptedException e) {
+            log.info("---------------------latch.await() exception == {}", e);
+            e.printStackTrace();
+        }
+        return instanceLogList;
+    }
+
+
+    public List<InstanceLog> searchSnapshotLog(SnapshotLog param){
+        List<InstanceLog> instanceLogList = new ArrayList<>();
+
+        String cachestring = (String) redisTemplate.opsForValue().get("sulan::log_snapshot_info::" + param.getId());
+        if (StringUtils.isNotBlank(cachestring)) {
+            InstanceLog instanceLog = new InstanceLog();
+            instanceLog.setInstanceName("null");
+            instanceLog.setLogList(Arrays.asList("--- no data, log snapshot may has expired. ---"));
+            instanceLogList.add(instanceLog);
+        }
+
+        //获取某个应用所有实例；
+        SnapshotLog snapshotLog = JSON.parseObject(cachestring, SnapshotLog.class);
+        List<InstanceInfo> instanceList = instanceInfoMapper.queryInstanceListByAppId(snapshotLog.getAppId());
+        CountDownLatch latch = new CountDownLatch(instanceList.size());
+        for (InstanceInfo app : instanceList) {
+            //加载shell，并登陆
+            Shell shell = getShellFromAppInfoConfig(app);
+            //使用shell执行搜索脚本操作
+            AppContext.getTaskExecutor().execute(()->{
+                InstanceLog instanceLog = new InstanceLog();
+                instanceLog.setInstanceName(app.getAppInstanceName());
+                shell.exec(snapshotLog.getCommand());
+                List<String> logList = shell.getStdout();
+                if(CollectionUtils.isEmpty(logList)){
+                    //没有结果，那么返回no-data
+                    instanceLog.setLogList(Arrays.asList("--- no data ---"));
+                } else {
+                    //如果使用tac+grep，把结果翻转
+                    if (snapshotLog.getMode().equals(CommandTemplate.tac.getName())) {
+                        Collections.reverse(logList);
+                    }
+                    //针对grep和tac+grep的做关键词高亮
+                    if(snapshotLog.getMode().equals(CommandTemplate.grep.getName()) || snapshotLog.getMode().equals(CommandTemplate.tac.getName())) {
+                        String highLight = "<a class='highLight'>" + snapshotLog.getKeyword() + "</a>";
+                        logList = logList.stream().map(e-> e.replaceAll(snapshotLog.getKeyword(), highLight)).collect(Collectors.toList());
+                    }
+                    instanceLog.setLogList(logList);
+                }
+                instanceLogList.add(instanceLog);
                 latch.countDown();
             });
         }

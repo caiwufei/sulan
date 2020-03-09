@@ -57,4 +57,11 @@ public class PageController {
         return mv;
     }
 
+    @RequestMapping("/snapshot.html")
+    public ModelAndView snapshot(ModelAndView mv, @RequestParam("id") String id){
+        mv.setViewName("snapshot");
+        mv.getModel().put("snapshotId", id);
+        return mv;
+    }
+
 }

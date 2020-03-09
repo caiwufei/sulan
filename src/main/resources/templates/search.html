@@ -120,8 +120,9 @@
         </div>-->
     </div>
 
-
-
+    <ul class="layui-fixbar" id="snapshot_bt" style="display: none">
+        <button type="button" class="layui-btn"><i class="layui-icon"></i></button>
+    </ul>
 
     <script th:src="@{/static/lib/layui/layui.js}"></script>
     <script th:src="@{/static/lib/template-web.js}"></script>
@@ -131,6 +132,9 @@
         /*]]>*/
     </script>
     <script>
+        //全局变量，只有发送查询请求的时候，这个值才有
+        var logshotId = "";
+
         String.prototype.format = function () {
             var values = arguments;
             return this.replace(/\{(\d+)\}/g, function (match, index) {
@@ -222,7 +226,8 @@
                     dataType: "json",
                     contentType: "application/json;charset=utf-8",
                     success: function(response){
-                        renderLogView(response);
+                        logshotId = response.data.snapshotId;
+                        renderLogView(response.data.instanceLogList);
                     },
                     complete: function(request, status){
                         layer.close(search);
@@ -230,10 +235,18 @@
                 });
             });
 
-            function renderLogView(response) {
-                var logHtml = template('logBoxTemplate', response);
+            $("#snapshot_bt").on("click", function(){
+                var link = contextPath + "snapshot.html?id" + logshotId;
+                link.select();
+                document.execCommand("copy"); // 执行浏览器复制命令
+                alert(link);
+            });
+
+            function renderLogView(logList) {
+                var logHtml = template('logBoxTemplate', logList);
                 $('#logdiv').html(logHtml);
                 element.render('#logdiv');
+                $('#snapshot_bt').css('display', 'block');
             }
 
             function form2JsonString(formId) {
@@ -268,7 +281,7 @@
         <fieldset class="layui-elem-field layui-field-title">
             <legend>日志搜索结果</legend>
         </fieldset>
-        <div class="layui-collapse" lay-filter="test">
+        <div class="layui-collapse" lay-filter="log-pannel">
             {{each data as instance i}}
             <div class="layui-colla-item">
                 <h2 class="layui-colla-title">{{instance.instanceName}}</h2>
