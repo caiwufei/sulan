@@ -10,7 +10,7 @@ import com.yilanjiaju.sulan.module.apps.pojo.AppInfo;
 import com.yilanjiaju.sulan.module.apps.pojo.InstanceInfo;
 import com.yilanjiaju.sulan.module.search.pojo.LogSearchParam;
 import com.yilanjiaju.sulan.module.search.pojo.Shell;
-import org.apache.commons.lang3.StringUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.text.StringSubstitutor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -28,6 +28,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class SearchService {
 
     @Autowired
@@ -48,19 +49,13 @@ public class SearchService {
         List<InstanceInfo> instanceList = instanceInfoMapper.queryInstanceList();
         for (InstanceInfo app : instanceList) {
             String key = app.getShellHost() + "_" + app.getShellPort() + "_" + app.getShellUser();
+            log.info("------------key=={}", key);
             if (userPass.get(key) == null) {
                 try {
                     String password = AESUtil.decrypt(app.getShellPass(), AESUtil.KEY);
                     userPass.put(key, password);
-                } catch (NoSuchPaddingException e) {
-                    e.printStackTrace();
-                } catch (NoSuchAlgorithmException e) {
-                    e.printStackTrace();
-                } catch (InvalidKeyException e) {
-                    e.printStackTrace();
-                } catch (BadPaddingException e) {
-                    e.printStackTrace();
-                } catch (IllegalBlockSizeException e) {
+                } catch (Exception e) {
+                    log.info("-----------loadHostPassCache exception=={}", e);
                     e.printStackTrace();
                 }
             }
@@ -80,6 +75,7 @@ public class SearchService {
         String finalCommand = StringSubstitutor.replace(CommandTemplate.getTemplateByName(param.getMode()),
                                                         JSON.parseObject(JSON.toJSONString(param), Map.class));
 
+        log.info("--------search command=={}", finalCommand);
         CountDownLatch latch = new CountDownLatch(instanceList.size());
         for (InstanceInfo app : instanceList) {
             //加载shell，并登陆
@@ -88,7 +84,7 @@ public class SearchService {
             AppContext.getTaskExecutor().execute(()->{
                 HashMap<String, Object> instanceMap = new HashMap();
                 instanceMap.put("instanceName", app.getAppInstanceName());
-                int code = shell.exec(finalCommand);
+                shell.exec(finalCommand);
                 List<String> logList = shell.getStdout();
                 if(CollectionUtils.isEmpty(logList)){
                     //没有结果，那么返回no-data
@@ -113,6 +109,7 @@ public class SearchService {
         try {
             latch.await();
         } catch (InterruptedException e) {
+            log.info("---------------------latch.await() exception == {}", e);
             e.printStackTrace();
         }
         return instanceLogList;
@@ -136,15 +133,8 @@ public class SearchService {
             try {
                 shell.setPassword(AESUtil.decrypt(app.getShellPass(), AESUtil.KEY));
                 userPass.put(key, shell.getPassword());
-            } catch (NoSuchPaddingException e) {
-                e.printStackTrace();
-            } catch (NoSuchAlgorithmException e) {
-                e.printStackTrace();
-            } catch (InvalidKeyException e) {
-                e.printStackTrace();
-            } catch (BadPaddingException e) {
-                e.printStackTrace();
-            } catch (IllegalBlockSizeException e) {
+            } catch (Exception e) {
+                log.info("---------------------get userPass exception == {}", e);
                 e.printStackTrace();
             }
         } else {

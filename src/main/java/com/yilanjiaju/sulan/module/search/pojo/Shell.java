@@ -2,6 +2,8 @@ package com.yilanjiaju.sulan.module.search.pojo;
 
 import com.jcraft.jsch.*;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -9,6 +11,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
 @Data
+@Slf4j
 public class Shell {
 
     //远程主机的ip地址
@@ -33,6 +36,7 @@ public class Shell {
             session.connect();
             return session;
         } catch (JSchException e) {
+            log.info("---------------------getSession exception == {}", e);
             e.printStackTrace();
         } catch (Exception e) {
             e.printStackTrace();
@@ -64,6 +68,7 @@ public class Shell {
                 stdout.add(line);
             }
         } catch (Exception e) {
+            log.info("---------------------shell exec exception == {}", e);
             e.printStackTrace();
         } finally {
             if(null!=input){
