@@ -227,23 +227,29 @@
                     contentType: "application/json;charset=utf-8",
                     success: function(response){
                         logshotId = response.data.snapshotId;
-                        renderLogView(response.data.instanceLogList);
+                        renderLogView(response.data);
                     },
                     complete: function(request, status){
-                        layer.close(search);
+                        layer.close(index);
                     }
                 });
             });
 
             $("#snapshot_bt").on("click", function(){
-                var link = contextPath + "snapshot.html?id" + logshotId;
-                link.select();
-                document.execCommand("copy"); // 执行浏览器复制命令
-                alert(link);
+                var link = document.location.origin +  contextPath + "snapshot.html?id=" + logshotId;
+
+                var oInput = document.createElement('input');
+                oInput.value = link;
+                document.body.appendChild(oInput);
+                oInput.select(); // 选择对象
+                document.execCommand("Copy"); // 执行浏览器复制命令
+                oInput.className = 'oInput';
+                oInput.style.display='none';
+                alert('结果链接复制成功');
             });
 
-            function renderLogView(logList) {
-                var logHtml = template('logBoxTemplate', logList);
+            function renderLogView(responsedata) {
+                var logHtml = template('logBoxTemplate', responsedata);
                 $('#logdiv').html(logHtml);
                 element.render('#logdiv');
                 $('#snapshot_bt').css('display', 'block');
@@ -282,7 +288,7 @@
             <legend>日志搜索结果</legend>
         </fieldset>
         <div class="layui-collapse" lay-filter="log-pannel">
-            {{each data as instance i}}
+            {{each instanceLogList as instance i}}
             <div class="layui-colla-item">
                 <h2 class="layui-colla-title">{{instance.instanceName}}</h2>
                 <div class="layui-colla-content layui-show">

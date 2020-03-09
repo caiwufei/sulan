@@ -8,14 +8,10 @@ import com.yilanjiaju.sulan.module.apps.pojo.AppInfo;
 import com.yilanjiaju.sulan.module.apps.pojo.InstanceInfo;
 import com.yilanjiaju.sulan.module.system.pojo.QueryPage;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 @Service
@@ -49,21 +45,20 @@ public class AppManagerService {
         instanceInfo.setId(CommonUtil.uuid());
         try {
             instanceInfo.setShellPass(AESUtil.encrypt(instanceInfo.getShellPass(), AESUtil.KEY));
-        } catch (NoSuchPaddingException e) {
-            e.printStackTrace();
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        } catch (InvalidKeyException e) {
-            e.printStackTrace();
-        } catch (BadPaddingException e) {
-            e.printStackTrace();
-        } catch (IllegalBlockSizeException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return instanceInfoMapper.addOneNewInstance(instanceInfo);
     }
 
     public int editAppInstance(InstanceInfo instanceInfo){
+        if(StringUtils.isNotBlank(instanceInfo.getShellPass())) {
+            try {
+                instanceInfo.setShellPass(AESUtil.encrypt(instanceInfo.getShellPass(), AESUtil.KEY));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
         return instanceInfoMapper.editAppInstance(instanceInfo);
     }
 

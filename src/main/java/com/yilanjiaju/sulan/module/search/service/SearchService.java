@@ -1,7 +1,6 @@
 package com.yilanjiaju.sulan.module.search.service;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.yilanjiaju.sulan.common.AppContext;
 import com.yilanjiaju.sulan.common.constant.CommandTemplate;
 import com.yilanjiaju.sulan.common.utils.AESUtil;
@@ -13,7 +12,6 @@ import com.yilanjiaju.sulan.module.search.pojo.InstanceLog;
 import com.yilanjiaju.sulan.module.search.pojo.LogSearchParam;
 import com.yilanjiaju.sulan.module.search.pojo.Shell;
 import com.yilanjiaju.sulan.module.search.pojo.SnapshotLog;
-import io.netty.util.internal.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringSubstitutor;
@@ -136,11 +134,12 @@ public class SearchService {
         List<InstanceLog> instanceLogList = new ArrayList<>();
 
         String cachestring = (String) redisTemplate.opsForValue().get("sulan::log_snapshot_info::" + param.getId());
-        if (StringUtils.isNotBlank(cachestring)) {
+        if (StringUtils.isBlank(cachestring)) {
             InstanceLog instanceLog = new InstanceLog();
             instanceLog.setInstanceName("null");
             instanceLog.setLogList(Arrays.asList("--- no data, log snapshot may has expired. ---"));
             instanceLogList.add(instanceLog);
+            return instanceLogList;
         }
 
         //获取某个应用所有实例；
