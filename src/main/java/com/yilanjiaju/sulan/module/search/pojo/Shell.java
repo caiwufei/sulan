@@ -34,10 +34,8 @@ public class Shell {
             session.setPassword(password);
             session.connect();
             return session;
-        } catch (JSchException e) {
-            log.info("---------------------getSession exception == {}", e);
-            e.printStackTrace();
         } catch (Exception e) {
+            log.info("---------------------getSession exception == {}", e);
             e.printStackTrace();
         }
         return null;
@@ -91,18 +89,11 @@ public class Shell {
                     e.printStackTrace();
                 }
             }
-            if(null!=getSession()){
-                getSession().disconnect();
+            if(null!=session){
+                session.disconnect();
             }
         }
         return -1;
     }
 
-    /**
-     * get stdout
-     * @return
-     */
-    public ArrayList<String> getStandardOutput() {
-        return stdout;
-    }
 }
