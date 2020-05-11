@@ -3,11 +3,12 @@ package com.yilanjiaju.sulan.module.search.pojo;
 import com.jcraft.jsch.*;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import java.io.BufferedReader;
+import org.apache.commons.io.IOUtils;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @Slf4j
@@ -22,78 +23,53 @@ public class Shell {
     //设置ssh连接的远程端口
     public int port = 22;
     //保存输出内容的容器
-    private ArrayList<String> stdout = new ArrayList<>();
+    private List<String> stdout = new ArrayList<>();
 
-
-    public Session getSession(){
-        JSch jsch = new JSch();
+    public void exec(String command){
+        ChannelExec channelExec = null;
+        InputStream inputStream = null;
+        Session session = null;
         try {
-            //创建session并且打开连接，因为创建session之后要主动打开连接
-            Session session = jsch.getSession(this.username, this.ip, this.port);
+            //创建session并且打开连接
+            JSch jsch = new JSch();
+            session = jsch.getSession(this.username, this.ip, this.port);
             session.setConfig("StrictHostKeyChecking", "no");
             session.setPassword(password);
             session.connect();
-            return session;
-        } catch (Exception e) {
-            log.info("---------------------getSession exception == {}", e);
-            e.printStackTrace();
-        }
-        return null;
-    }
 
-    public int exec(String command){
-        Session session = null;
-        ChannelExec channelExec = null;
-        BufferedReader input = null;
-        InputStreamReader inputStreamReader = null;
-        try {
             //打开通道，设置通道类型，和执行的命令
-            session = getSession();
-            if(null==session){
-                return -1;
-            }
             channelExec = (ChannelExec)session.openChannel("exec");
-            channelExec.setCommand(command);
             channelExec.setInputStream(null);
-            inputStreamReader = new InputStreamReader(channelExec.getInputStream(), StandardCharsets.UTF_8);
-            input = new BufferedReader(inputStreamReader);
+            channelExec.setErrStream(System.err);
 
+            channelExec.setCommand(command);
+            inputStream = channelExec.getInputStream();
             channelExec.connect();
-            //接收远程服务器执行命令的结果
-            String line;
-            while ((line = input.readLine()) != null) {
-                stdout.add(line);
-            }
+            stdout = IOUtils.readLines(inputStream,  StandardCharsets.UTF_8);
+
         } catch (Exception e) {
             log.info("---------------------shell exec exception == {}", e);
             e.printStackTrace();
         } finally {
-            if(null!=input){
+            if (null!=inputStream) {
                 try {
-                    input.close();
+                    inputStream.close();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
-            if(null!=channelExec){
+            if (null!=channelExec) {
+                try {
+                    channelExec.getSession().disconnect();
+                } catch (JSchException e) {
+                    e.printStackTrace();
+                }
                 channelExec.disconnect();
-                // 得到returnCode
-                if (channelExec.isClosed()) {
-                    return channelExec.getExitStatus();
-                }
-            }
-            if(null!=inputStreamReader) {
-                try {
-                    inputStreamReader.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
             }
             if(null!=session){
                 session.disconnect();
             }
         }
-        return -1;
     }
 
 }

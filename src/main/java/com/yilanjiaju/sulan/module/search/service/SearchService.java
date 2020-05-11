@@ -76,13 +76,12 @@ public class SearchService {
         List<InstanceInfo> instanceList = instanceInfoMapper.queryInstanceListByAppId(param.getAppId());
 
         String finalCommand = StringSubstitutor.replace(CommandTemplate.getTemplateByName(param.getMode()),
-                                                        JSON.parseObject(JSON.toJSONString(param), Map.class));
+                JSON.parseObject(JSON.toJSONString(param), Map.class));
 
         log.info("--------search command=={}", finalCommand);
 
         CountDownLatch latch = new CountDownLatch(instanceList.size());
         for (InstanceInfo app : instanceList) {
-            //加载shell，并登陆
             Shell shell = getShellFromAppInfoConfig(app);
             //使用shell执行搜索脚本操作
             AppContext.getTaskExecutor().execute(()->{
